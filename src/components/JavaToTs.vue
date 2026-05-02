@@ -1,6 +1,7 @@
 <template>
-  <div class="java-to-ts">
+  <div class="tool-shell">
     <h2>Java DTO 转 TypeScript</h2>
+    <p class="subtitle">支持常见 DTO 类型，未知类型会标注提示。</p>
     <div class="operation-area">
       <el-row :gutter="20">
         <el-col :span="12">
@@ -194,15 +195,31 @@ const copyToClipboard = async () => {
 </script>
 
 <style scoped>
-.java-to-ts {
-  max-width: 1000px;
-  margin: 0 auto;
+.tool-shell {
+  width: 100%;
+  max-width: 860px;
+  padding: 20px;
+  border: 1px solid #e6e8eb;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
+
+.subtitle {
+  margin: 6px 0 18px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
 .operation-area {
-  padding: 20px 0;
+  margin-top: 12px;
+  padding: 14px;
+  background: #fafafa;
+  border: 1px dashed #e5e7eb;
+  border-radius: 8px;
 }
+
 .mt-4 {
   margin-top: 16px;
 }
 </style>
-

@@ -1,6 +1,7 @@
 <template>
-  <div class="zip-tool">
-    <h2>ZIP 压缩/解压工具</h2>
+  <div class="tool-shell">
+    <h2>压缩/解压工具</h2>
+    <p class="subtitle">压缩仅支持 ZIP，解压支持常见格式（zip/rar/7z/tar/gz/xz/bz2）。</p>
     <el-tabs v-model="activeTab">
       <el-tab-pane label="压缩文件" name="compress">
         <div class="operation-area">
@@ -20,7 +21,7 @@
           </el-upload>
 
           <div class="action-bar" v-if="compressFiles.length > 0">
-            <el-input v-model="zipFileName" placeholder="输入压缩包名 (默认: archive.zip)" style="width: 250px; margin-right: 15px;"></el-input>
+            <el-input v-model="zipFileName" placeholder="输入压缩包名 (默认: archive.zip)" style="width: 260px; margin-right: 12px;"></el-input>
             <el-button type="primary" @click="doCompress" :loading="isCompressing">压缩并下载</el-button>
           </div>
 
@@ -28,7 +29,7 @@
             v-if="compressProgress > 0"
             :percentage="compressProgress"
             :text-inside="true"
-            :stroke-width="20"
+            :stroke-width="18"
             status="success"
             class="mt-4"
           />
@@ -44,11 +45,11 @@
             :on-change="handleDecompressChange"
             :file-list="singleZipFile"
             :limit="1"
-            accept=".zip"
+            :accept="decompressAccept"
           >
             <el-icon class="el-icon--upload"><upload-filled /></el-icon>
             <div class="el-upload__text">
-              拖拽ZIP文件到此处，或 <em>点击选择ZIP文件</em>
+              拖拽压缩文件到此处，或 <em>点击选择压缩文件</em>
             </div>
           </el-upload>
 
@@ -60,7 +61,7 @@
             v-if="decompressProgress > 0"
             :percentage="decompressProgress"
             :text-inside="true"
-            :stroke-width="20"
+            :stroke-width="18"
             status="warning"
             class="mt-4"
           />
@@ -84,13 +85,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import JSZip from 'jszip'
+import { computed, ref } from 'vue'
 import { saveAs } from 'file-saver'
 import { ElMessage } from 'element-plus'
-import {UploadFilled} from "@element-plus/icons-vue";
+import { UploadFilled } from '@element-plus/icons-vue'
+import { ARCHIVE_EXTENSIONS, decompressArchive } from '../tools/archive/libarchive'
+import { compressZip, decompressZip } from '../tools/archive/zip'
 
 const activeTab = ref('compress')
+
+const decompressAccept = computed(() => ARCHIVE_EXTENSIONS.join(','))
 
 // Compress state
 const compressFiles = ref<any[]>([])
@@ -104,12 +108,11 @@ const isDecompressing = ref(false)
 const decompressProgress = ref(0)
 const unzippedFiles = ref<any[]>([])
 
-// --- Compress Functions ---
-const handleCompressChange = (fileList: any[]) => {
+const handleCompressChange = (_file: any, fileList: any[]) => {
   compressFiles.value = fileList
 }
 
-const handleCompressRemove = (fileList: any[]) => {
+const handleCompressRemove = (_file: any, fileList: any[]) => {
   compressFiles.value = fileList
 }
 
@@ -120,20 +123,10 @@ const doCompress = async () => {
   compressProgress.value = 0
 
   try {
-    const zip = new JSZip()
-
-    compressFiles.value.forEach(fileItem => {
-      const file = fileItem.raw
-      zip.file(file.name, file)
-    })
-
-    const content = await zip.generateAsync({
-      type: 'blob',
-      compression: 'DEFLATE',
-      compressionOptions: { level: 6 }
-    }, (metadata) => {
-      compressProgress.value = Math.floor(metadata.percent)
-    })
+    const content = await compressZip(
+      compressFiles.value,
+      (percent) => { compressProgress.value = percent }
+    )
 
     let name = zipFileName.value.trim() || 'archive'
     if (!name.endsWith('.zip')) {
@@ -151,9 +144,8 @@ const doCompress = async () => {
   }
 }
 
-// --- Decompress Functions ---
-const handleDecompressChange = (file: any, _fileList: any[]) => {
-  singleZipFile.value = [file]
+const handleDecompressChange = (_file: any, fileList: any[]) => {
+  singleZipFile.value = fileList.slice(-1)
   unzippedFiles.value = []
   decompressProgress.value = 0
 }
@@ -167,34 +159,15 @@ const doDecompress = async () => {
 
   try {
     const file = singleZipFile.value[0].raw
-    const zip = new JSZip()
-
-    const loadedZip = await zip.loadAsync(file)
-
-    const totalFiles = Object.keys(loadedZip.files).length
-    let processed = 0
-    let filesData: any[] = []
-
-    for (const [filename, zipEntry] of Object.entries(loadedZip.files)) {
-      if (!zipEntry.dir) {
-        const u8 = await zipEntry.async("uint8array", (_metadata) => {
-          // This is progress per file, to make it simple we use file count
-        })
-        filesData.push({
-          name: filename,
-          size: u8.length,
-          data: u8
-        })
-      }
-      processed++
-      decompressProgress.value = Math.floor((processed / totalFiles) * 100)
-    }
+    const filesData = file.name.toLowerCase().endsWith('.zip')
+      ? await decompressZip(file, (percent) => { decompressProgress.value = percent })
+      : await decompressArchive(file, (percent) => { decompressProgress.value = percent })
 
     unzippedFiles.value = filesData
     ElMessage.success('解压准备完成！您可以下载单个文件了。')
   } catch (error) {
     console.error(error)
-    ElMessage.error('解压过程中出现错误，请确认是否为正确的ZIP文件')
+    ElMessage.error('解压过程中出现错误，请确认是否为正确的压缩文件')
   } finally {
     isDecompressing.value = false
   }
@@ -207,19 +180,51 @@ const downloadFile = (fileObj: any) => {
 </script>
 
 <style scoped>
-.zip-tool {
-  max-width: 800px;
-  margin: 0 auto;
+.tool-shell {
+  width: 100%;
+  max-width: 860px;
+  padding: 20px;
+  border: 1px solid #e6e8eb;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
+
+.subtitle {
+  margin: 6px 0 18px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
 .operation-area {
-  padding: 20px 0;
+  margin-top: 12px;
+  padding: 14px;
+  background: #fafafa;
+  border: 1px dashed #e5e7eb;
+  border-radius: 8px;
 }
+
 .action-bar {
-  margin-top: 20px;
+  margin-top: 14px;
   display: flex;
   align-items: center;
 }
+
+.file-list {
+  margin-top: 18px;
+}
+
+.el-upload__text {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.el-icon--upload {
+  font-size: 28px;
+  color: #409eff;
+}
+
 .mt-4 {
-  margin-top: 20px;
+  margin-top: 16px;
 }
 </style>
