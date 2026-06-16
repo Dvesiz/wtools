@@ -1,7 +1,7 @@
 <template>
   <div class="tool-shell list-shell">
     <div class="shell-header">
-      <div class="header-accent"></div>
+      <div class="header-accent" />
       <div class="header-content">
         <div class="header-top">
           <h2>
@@ -80,7 +80,7 @@
       </div>
 
       <div class="list-panel">
-        <div class="list-toolbar" v-if="rendered">
+        <div v-if="rendered" class="list-toolbar">
           <span class="toolbar-count">
             <span class="node-dot" />
             已渲染 {{ nodeCount }} / {{ totalNodeCount }} 个节点
@@ -93,7 +93,7 @@
         <div v-if="!rendered" class="list-placeholder">
           <el-empty :image-size="100" description="输入树形文本后点击「渲染树列表」" />
         </div>
-        <div ref="listContainer" class="list-container" v-show="rendered" />
+        <div v-show="rendered" ref="listContainer" class="list-container" />
       </div>
     </div>
   </div>
