@@ -1,0 +1,530 @@
+{
+  "name": "启动程序\nmain.py",
+  "value": "程序入口",
+  "itemStyle": {
+    "color": "#2E75B6",
+    "borderColor": "#1a4a7a",
+    "borderWidth": 2
+  },
+  "label": {
+    "fontSize": 16,
+    "fontWeight": "bold"
+  },
+  "children": [
+    {
+      "name": "加载数据源",
+      "value": "三源数据",
+      "itemStyle": {
+        "color": "#ED7D31"
+      },
+      "children": [
+        {
+          "name": "movie.csv",
+          "value": "电影基础数据\n(电影名/类型/导演/主演/地区/特色/评分)",
+          "itemStyle": {
+            "color": "#F4B084"
+          },
+          "children": [
+            {
+              "name": "字段重命名",
+              "value": "中文→英文\n(title/genre/director/cast/region/feature/vote_average)",
+              "itemStyle": {
+                "color": "#FCE4D6"
+              }
+            },
+            {
+              "name": "主演人数计算",
+              "value": "cast_size = len(cast.split('|'))",
+              "itemStyle": {
+                "color": "#FCE4D6"
+              }
+            }
+          ]
+        },
+        {
+          "name": "user.csv",
+          "value": "用户评分数据\n(电影名/评分)",
+          "itemStyle": {
+            "color": "#F4B084"
+          },
+          "children": [
+            {
+              "name": "评分统计聚合",
+              "value": "groupby电影名\n→ rating_count + user_avg_rating",
+              "itemStyle": {
+                "color": "#FCE4D6"
+              }
+            }
+          ]
+        },
+        {
+          "name": "douban.db",
+          "value": "豆瓣评论数据库\n(comment表)",
+          "itemStyle": {
+            "color": "#F4B084"
+          },
+          "children": [
+            {
+              "name": "评论统计",
+              "value": "COUNT + AVG(RATING)\nWHERE RATING != '-'",
+              "itemStyle": {
+                "color": "#FCE4D6"
+              }
+            },
+            {
+              "name": "电影名映射",
+              "value": "movie UNION movie_chinese\n→ ID/NAME关联",
+              "itemStyle": {
+                "color": "#FCE4D6"
+              }
+            },
+            {
+              "name": "合并统计",
+              "value": "douban_avg_rating\ndouban_rating_count",
+              "itemStyle": {
+                "color": "#FCE4D6"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "数据清洗\nDataCleaner.clean()",
+      "value": "数据清洗模块",
+      "itemStyle": {
+        "color": "#70AD47"
+      },
+      "children": [
+        {
+          "name": "合并 movie + user",
+          "value": "merge on title\nhow='left'",
+          "itemStyle": {
+            "color": "#A9D18E"
+          }
+        },
+        {
+          "name": "合并 douban 统计",
+          "value": "merge on title\nhow='left'",
+          "itemStyle": {
+            "color": "#A9D18E"
+          }
+        },
+        {
+          "name": "缺失值填充",
+          "value": "rating_count→0\nuser_avg_rating→vote_average均值\ndouban_avg_rating→vote_average均值",
+          "itemStyle": {
+            "color": "#A9D18E"
+          }
+        },
+        {
+          "name": "删除空值",
+          "value": "dropna(subset=[vote_average, genre, director])",
+          "itemStyle": {
+            "color": "#A9D18E"
+          }
+        },
+        {
+          "name": "衍生字段",
+          "value": "genres_list = [genre]",
+          "itemStyle": {
+            "color": "#A9D18E"
+          }
+        },
+        {
+          "name": "特征工程\nget_prediction_data()",
+          "value": "预测专用数据",
+          "itemStyle": {
+            "color": "#548235"
+          },
+          "children": [
+            {
+              "name": "类型独热编码",
+              "value": "pd.get_dummies(genre, prefix='genre_')",
+              "itemStyle": {
+                "color": "#C5E0B4"
+              }
+            },
+            {
+              "name": "地区独热编码",
+              "value": "pd.get_dummies(region, prefix='region_')",
+              "itemStyle": {
+                "color": "#C5E0B4"
+              }
+            },
+            {
+              "name": "特色独热编码",
+              "value": "pd.get_dummies(feature, prefix='feature_')",
+              "itemStyle": {
+                "color": "#C5E0B4"
+              }
+            },
+            {
+              "name": "导演影响力",
+              "value": "director_popularity = director.value_counts()",
+              "itemStyle": {
+                "color": "#C5E0B4"
+              }
+            },
+            {
+              "name": "删除字符串列",
+              "value": "drop genre/region/feature",
+              "itemStyle": {
+                "color": "#C5E0B4"
+              }
+            },
+            {
+              "name": "删除空值",
+              "value": "dropna() + reset_index",
+              "itemStyle": {
+                "color": "#C5E0B4"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "选择分析功能\nanalysis.py",
+      "value": "5大功能模块",
+      "itemStyle": {
+        "color": "#5B9BD5"
+      },
+      "children": [
+        {
+          "name": "功能1：各类型电影平均评分",
+          "value": "analyze_genre_rating()",
+          "itemStyle": {
+            "color": "#9DC3E6"
+          },
+          "children": [
+            {
+              "name": "groupby genre",
+              "value": "按类型分组",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            },
+            {
+              "name": "mean vote_average",
+              "value": "计算平均评分",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            },
+            {
+              "name": "sort descending",
+              "value": "降序排列",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            },
+            {
+              "name": "plot_bar",
+              "value": "柱状图展示",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            }
+          ]
+        },
+        {
+          "name": "功能2：各类型电影数量占比",
+          "value": "analyze_genre_count()",
+          "itemStyle": {
+            "color": "#9DC3E6"
+          },
+          "children": [
+            {
+              "name": "value_counts",
+              "value": "统计各类型数量",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            },
+            {
+              "name": "explode top3",
+              "value": "突出显示前3位",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            },
+            {
+              "name": "plot_pie",
+              "value": "饼图展示",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            }
+          ]
+        },
+        {
+          "name": "功能3：评分年度/地区趋势",
+          "value": "analyze_year_trend()",
+          "itemStyle": {
+            "color": "#9DC3E6"
+          },
+          "children": [
+            {
+              "name": "判断年份数据",
+              "value": "if 'release_year' in df",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            },
+            {
+              "name": "按年份分析",
+              "value": "groupby release_year\nagg(avg_rating, count)",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            },
+            {
+              "name": "fallback: 按地区",
+              "value": "groupby region\nvalue_counts + mean",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            },
+            {
+              "name": "双轴图",
+              "value": "ax1.plot(评分) + ax2.bar(数量)",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            }
+          ]
+        },
+        {
+          "name": "功能4：热门导演作品分析",
+          "value": "analyze_director()",
+          "itemStyle": {
+            "color": "#9DC3E6"
+          },
+          "children": [
+            {
+              "name": "groupby director",
+              "value": "按导演分组",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            },
+            {
+              "name": "agg count + avg",
+              "value": "作品数量 + 平均评分",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            },
+            {
+              "name": "sort + head(10)",
+              "value": "取Top10",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            },
+            {
+              "name": "plot_bar horizontal",
+              "value": "横向柱状图",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            }
+          ]
+        },
+        {
+          "name": "功能5：电影评分预测",
+          "value": "predict_rating()",
+          "itemStyle": {
+            "color": "#9DC3E6"
+          },
+          "children": [
+            {
+              "name": "获取预测数据",
+              "value": "get_prediction_data()\n采样5000条",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            },
+            {
+              "name": "特征列提取",
+              "value": "排除 title + vote_average",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            },
+            {
+              "name": "删除空值",
+              "value": "X.notna().all() & y.notna()",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            },
+            {
+              "name": "train_test_split",
+              "value": "test_size=0.2\nrandom_state=42",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            },
+            {
+              "name": "StandardScaler",
+              "value": "fit_transform(X_train)\ntransform(X_test)",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            },
+            {
+              "name": "LinearRegression",
+              "value": "model.fit()\nmodel.predict()",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            },
+            {
+              "name": "模型评估",
+              "value": "MSE / RMSE / R2\n训练集 + 测试集",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            },
+            {
+              "name": "自定义预测",
+              "value": "2条测试数据\n剧情片 + 动作片",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            },
+            {
+              "name": "plot_scatter",
+              "value": "散点图 + 对角线\n+ 评估指标文本",
+              "itemStyle": {
+                "color": "#D6E4F0"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "生成图表/预测结果",
+      "value": "chart_tools.py + 输出",
+      "itemStyle": {
+        "color": "#7030A0"
+      },
+      "children": [
+        {
+          "name": "图表渲染",
+          "value": "6种图表类型",
+          "itemStyle": {
+            "color": "#B4A7D6"
+          },
+          "children": [
+            {
+              "name": "plot_bar",
+              "value": "柱状图（纵向/横向）",
+              "itemStyle": {
+                "color": "#D9D2E9"
+              }
+            },
+            {
+              "name": "plot_pie",
+              "value": "饼图（突出显示）",
+              "itemStyle": {
+                "color": "#D9D2E9"
+              }
+            },
+            {
+              "name": "plot_line",
+              "value": "折线图",
+              "itemStyle": {
+                "color": "#D9D2E9"
+              }
+            },
+            {
+              "name": "plot_scatter",
+              "value": "散点图（颜色映射）",
+              "itemStyle": {
+                "color": "#D9D2E9"
+              }
+            },
+            {
+              "name": "plot_double_line",
+              "value": "双折线图",
+              "itemStyle": {
+                "color": "#D9D2E9"
+              }
+            },
+            {
+              "name": "plot_heatmap",
+              "value": "热力图",
+              "itemStyle": {
+                "color": "#D9D2E9"
+              }
+            }
+          ]
+        },
+        {
+          "name": "预测结果输出",
+          "value": "DataFrame + 图表",
+          "itemStyle": {
+            "color": "#B4A7D6"
+          },
+          "children": [
+            {
+              "name": "真实值 vs 预测值",
+              "value": "vote_average + predicted_rating",
+              "itemStyle": {
+                "color": "#D9D2E9"
+              }
+            },
+            {
+              "name": "误差分析",
+              "value": "error = predicted - actual",
+              "itemStyle": {
+                "color": "#D9D2E9"
+              }
+            },
+            {
+              "name": "评估指标文本",
+              "value": "MSE/RMSE/R2 标注",
+              "itemStyle": {
+                "color": "#D9D2E9"
+              }
+            },
+            {
+              "name": "自定义预测标注",
+              "value": "annotate 剧情片/动作片",
+              "itemStyle": {
+                "color": "#D9D2E9"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GUI展示",
+          "value": "PyQt5 MainWindow",
+          "itemStyle": {
+            "color": "#B4A7D6"
+          },
+          "children": [
+            {
+              "name": "图表嵌入",
+              "value": "matplotlib → Qt Widget",
+              "itemStyle": {
+                "color": "#D9D2E9"
+              }
+            },
+            {
+              "name": "数据表格",
+              "value": "预测结果表格展示",
+              "itemStyle": {
+                "color": "#D9D2E9"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

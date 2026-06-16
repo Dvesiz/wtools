@@ -1,12 +1,11 @@
 <template>
   <div class="tool-page">
-    <JavaToTs />
+    <TreeVisualizer />
   </div>
 </template>
 
 <script setup lang="ts">
-import JavaToTs from '../components/JavaToTs.vue'
+import TreeVisualizer from '../components/TreeVisualizer.vue'
 </script>
-
 
 

@@ -1,0 +1,35 @@
+project/
+├── src/
+│   ├── __init__.py           # 包初始化
+│   ├── main.py               # 程序主入口
+│   ├── gui/
+│   │   ├── __init__.py
+│   │   ├── main_window.py    # 主窗体模块
+│   │   └── dialogs.py        # 弹窗组件
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── analysis.py       # 核心分析逻辑
+│   │   ├── data_cleaner.py   # 数据清洗模块
+│   │   └── chart_tools.py    # 图表工具模块
+│   └── models/
+│       ├── __init__.py
+│       ├── movie.py          # 电影数据模型
+│       └── user.py           # 用户数据模型
+├── data/
+│   ├── movie.csv             # 电影数据文件
+│   ├── user.csv              # 用户评分数据
+│   └── ratings.csv           # 评分记录文件
+├── db/
+│   ├── douban.db             # SQLite主数据库
+│   └── backup.db             # 备份数据库
+├── config/
+│   ├── settings.yaml         # 应用配置
+│   └── logging.conf          # 日志配置
+├── tests/
+│   ├── test_analysis.py
+│   ├── test_cleaner.py
+│   └── fixtures/
+│       └── sample.csv
+├── README.md                 # 项目说明
+├── requirements.txt          # 依赖列表
+└── run.py                    # 启动脚本

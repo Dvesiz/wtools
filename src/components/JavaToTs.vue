@@ -1,7 +1,35 @@
 <template>
-  <div class="tool-shell">
-    <h2>Java DTO 转 TypeScript</h2>
-    <p class="subtitle">支持常见 DTO 类型，未知类型会标注提示。</p>
+  <div class="tool-shell unified-shell">
+    <div class="shell-header">
+      <div class="header-accent" />
+      <div class="header-content">
+        <div class="header-top">
+          <h2>
+            <el-icon class="header-icon"><DataAnalysis /></el-icon>
+            Java DTO 转 TypeScript
+            <el-popover placement="right" :width="280" trigger="hover" :teleported="false" popper-class="info-popover">
+              <template #reference>
+                <span class="info-btn">i</span>
+              </template>
+              <div class="info-body">
+                <div class="info-section">
+                  <div class="info-label">功能</div>
+                  <div class="info-text">快速将 Java DTO / VO 代码解析并转换为 TypeScript 接口定义。</div>
+                </div>
+                <div class="info-section">
+                  <div class="info-label">类型映射</div>
+                  <div class="info-text">String → string · Integer/Long → number · Boolean → boolean · List&lt;T&gt; → T[] · Map → Record</div>
+                </div>
+                <div class="info-section">
+                  <div class="info-label">注意事项</div>
+                  <div class="info-text">无法识别的自定义类型会标记 FIXME 注释，需要手动补充类型定义。</div>
+                </div>
+              </div>
+            </el-popover>
+          </h2>
+        </div>
+      </div>
+    </div>
     <div class="operation-area">
       <el-row :gutter="20">
         <el-col :span="12">
@@ -15,7 +43,7 @@ public class RoleResp {
     private Integer id;
     private String name;
 }"
-          ></el-input>
+          />
           <div class="action-bar mt-4">
             <el-button type="primary" @click="convertToTs">转换为 TypeScript</el-button>
           </div>
@@ -28,8 +56,8 @@ public class RoleResp {
             :rows="20"
             readonly
             placeholder="生成的 TypeScript 代码将显示在这里"
-          ></el-input>
-          <div class="action-bar mt-4" v-if="tsCode">
+          />
+          <div v-if="tsCode" class="action-bar mt-4">
             <el-button @click="copyToClipboard">复制结果</el-button>
           </div>
         </el-col>
@@ -147,7 +175,7 @@ const convertToTs = () => {
     if (line.startsWith('//') || line.startsWith('@')) continue;
 
     // basic matcher: (private|protected|public)? [Type] [name];
-    const fieldMatch = line.match(/(?:(?:private|protected|public)\s+)?([\w<>,?\[\] ]+)\s+(\w+)\s*;/);
+    const fieldMatch = line.match(/(?:(?:private|protected|public)\s+)?([\w<>,?[\] ]+)\s+(\w+)\s*;/);
     if (fieldMatch) {
       let rawType = fieldMatch[1].trim();
       let fieldName = fieldMatch[2].trim();
@@ -195,31 +223,7 @@ const copyToClipboard = async () => {
 </script>
 
 <style scoped>
-.tool-shell {
-  width: 100%;
-  max-width: 860px;
-  padding: 20px;
-  border: 1px solid #e6e8eb;
-  border-radius: 10px;
-  background-color: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-}
-
-.subtitle {
-  margin: 6px 0 18px;
-  color: #6b7280;
-  font-size: 13px;
-}
-
-.operation-area {
-  margin-top: 12px;
-  padding: 14px;
-  background: #fafafa;
-  border: 1px dashed #e5e7eb;
-  border-radius: 8px;
-}
-
-.mt-4 {
-  margin-top: 16px;
+.unified-shell {
+  padding: 24px;
 }
 </style>

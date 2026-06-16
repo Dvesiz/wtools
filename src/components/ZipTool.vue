@@ -1,7 +1,31 @@
 <template>
-  <div class="tool-shell">
-    <h2>压缩/解压工具</h2>
-    <p class="subtitle">压缩仅支持 ZIP，解压支持常见格式（zip/rar/7z/tar/gz/xz/bz2）。</p>
+  <div class="tool-shell unified-shell">
+    <div class="shell-header">
+      <div class="header-accent" />
+      <div class="header-content">
+        <div class="header-top">
+          <h2>
+            <el-icon class="header-icon"><Document /></el-icon>
+            压缩/解压工具
+            <el-popover placement="right" :width="280" trigger="hover" :teleported="false" popper-class="info-popover">
+              <template #reference>
+                <span class="info-btn">i</span>
+              </template>
+              <div class="info-body">
+                <div class="info-section">
+                  <div class="info-label">功能</div>
+                  <div class="info-text">ZIP 文件压缩与解压，支持多文件拖拽打包、进度显示、常见归档格式解压。</div>
+                </div>
+                <div class="info-section">
+                  <div class="info-label">注意事项</div>
+                  <div class="info-text">压缩仅支持 ZIP 格式。解压支持 zip/rar/7z/tar/gz/xz/bz2。需浏览器支持 WebAssembly。</div>
+                </div>
+              </div>
+            </el-popover>
+          </h2>
+        </div>
+      </div>
+    </div>
     <el-tabs v-model="activeTab">
       <el-tab-pane label="压缩文件" name="compress">
         <div class="operation-area">
@@ -20,9 +44,9 @@
             </div>
           </el-upload>
 
-          <div class="action-bar" v-if="compressFiles.length > 0">
-            <el-input v-model="zipFileName" placeholder="输入压缩包名 (默认: archive.zip)" style="width: 260px; margin-right: 12px;"></el-input>
-            <el-button type="primary" @click="doCompress" :loading="isCompressing">压缩并下载</el-button>
+          <div v-if="compressFiles.length > 0" class="action-bar">
+            <el-input v-model="zipFileName" placeholder="输入压缩包名 (默认: archive.zip)" style="width: 260px; margin-right: 12px;" />
+            <el-button type="primary" :loading="isCompressing" @click="doCompress">压缩并下载</el-button>
           </div>
 
           <el-progress
@@ -53,8 +77,8 @@
             </div>
           </el-upload>
 
-          <div class="action-bar" v-if="singleZipFile.length > 0">
-            <el-button type="primary" @click="doDecompress" :loading="isDecompressing">提取内容</el-button>
+          <div v-if="singleZipFile.length > 0" class="action-bar">
+            <el-button type="primary" :loading="isDecompressing" @click="doDecompress">提取内容</el-button>
           </div>
 
           <el-progress
@@ -96,23 +120,26 @@ const activeTab = ref('compress')
 
 const decompressAccept = computed(() => ARCHIVE_EXTENSIONS.join(','))
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type FileListItem = any
+
 // Compress state
-const compressFiles = ref<any[]>([])
+const compressFiles = ref<FileListItem[]>([])
 const zipFileName = ref('')
 const isCompressing = ref(false)
 const compressProgress = ref(0)
 
 // Decompress state
-const singleZipFile = ref<any[]>([])
+const singleZipFile = ref<FileListItem[]>([])
 const isDecompressing = ref(false)
 const decompressProgress = ref(0)
-const unzippedFiles = ref<any[]>([])
+const unzippedFiles = ref<FileListItem[]>([])
 
-const handleCompressChange = (_file: any, fileList: any[]) => {
+const handleCompressChange = (_file: FileListItem, fileList: FileListItem[]) => {
   compressFiles.value = fileList
 }
 
-const handleCompressRemove = (_file: any, fileList: any[]) => {
+const handleCompressRemove = (_file: FileListItem, fileList: FileListItem[]) => {
   compressFiles.value = fileList
 }
 
@@ -144,7 +171,7 @@ const doCompress = async () => {
   }
 }
 
-const handleDecompressChange = (_file: any, fileList: any[]) => {
+const handleDecompressChange = (_file: FileListItem, fileList: FileListItem[]) => {
   singleZipFile.value = fileList.slice(-1)
   unzippedFiles.value = []
   decompressProgress.value = 0
@@ -173,45 +200,24 @@ const doDecompress = async () => {
   }
 }
 
-const downloadFile = (fileObj: any) => {
-  const blob = new Blob([fileObj.data])
+const downloadFile = (fileObj: { name: string; data: Uint8Array }) => {
+  const blob = new Blob([new Uint8Array(fileObj.data)])
   saveAs(blob, fileObj.name.split('/').pop() || fileObj.name)
 }
 </script>
 
 <style scoped>
-.tool-shell {
-  width: 100%;
-  max-width: 860px;
-  padding: 20px;
-  border: 1px solid #e6e8eb;
-  border-radius: 10px;
-  background-color: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-}
-
-.subtitle {
-  margin: 6px 0 18px;
-  color: #6b7280;
-  font-size: 13px;
-}
-
-.operation-area {
-  margin-top: 12px;
-  padding: 14px;
-  background: #fafafa;
-  border: 1px dashed #e5e7eb;
-  border-radius: 8px;
-}
-
-.action-bar {
-  margin-top: 14px;
-  display: flex;
-  align-items: center;
+.unified-shell {
+  padding: 24px;
 }
 
 .file-list {
   margin-top: 18px;
+}
+.file-list h4 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #374151;
 }
 
 .el-upload__text {
@@ -221,10 +227,17 @@ const downloadFile = (fileObj: any) => {
 
 .el-icon--upload {
   font-size: 28px;
-  color: #409eff;
+  color: #5b73e0;
 }
 
-.mt-4 {
-  margin-top: 16px;
+:deep(.el-tabs__item) {
+  font-size: 14px;
+  font-weight: 500;
+}
+:deep(.el-tabs__item.is-active) {
+  color: #5b73e0;
+}
+:deep(.el-tabs__active-bar) {
+  background-color: #5b73e0;
 }
 </style>

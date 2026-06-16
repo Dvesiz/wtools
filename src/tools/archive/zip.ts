@@ -5,7 +5,7 @@ export type ArchiveFile = {
 }
 
 export const compressZip = async (
-  files: any[],
+  files: { raw: File }[],
   onProgress?: (percent: number) => void
 ): Promise<Blob> => {
   const { default: JSZip } = await import('jszip')

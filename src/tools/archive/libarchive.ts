@@ -2,10 +2,13 @@ import type { ArchiveFile } from './zip'
 
 export const ARCHIVE_EXTENSIONS = ['.zip', '.rar', '.7z', '.tar', '.gz', '.tgz', '.bz2', '.xz']
 
-const getEntryName = (entry: any): string =>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type LibArchiveEntry = any
+
+const getEntryName = (entry: LibArchiveEntry): string =>
   entry.path || entry.pathname || entry.name || entry.filepath || 'unknown'
 
-const isDirectoryEntry = (entry: any): boolean => {
+const isDirectoryEntry = (entry: LibArchiveEntry): boolean => {
   if (typeof entry.isDirectory === 'function') return entry.isDirectory()
   if (typeof entry.isDirectory === 'boolean') return entry.isDirectory
   if (entry.type === 'directory' || entry.filetype === 'directory') return true
@@ -13,7 +16,7 @@ const isDirectoryEntry = (entry: any): boolean => {
   return name.endsWith('/')
 }
 
-const readEntryData = async (entry: any): Promise<Uint8Array> => {
+const readEntryData = async (entry: LibArchiveEntry): Promise<Uint8Array> => {
   if (typeof entry.readData === 'function') {
     const data = await entry.readData()
     return data instanceof Uint8Array ? data : new Uint8Array(data)
@@ -34,6 +37,7 @@ export const decompressArchive = async (
   onProgress?: (percent: number) => void
 ): Promise<ArchiveFile[]> => {
   const module = await import('libarchive.js')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Archive = (module as any).Archive || (module as any).default?.Archive || (module as any).default
 
   if (!Archive || typeof Archive.open !== 'function') {
@@ -41,7 +45,8 @@ export const decompressArchive = async (
   }
 
   const archive = await Archive.open(file)
-  let entries: any = archive.getEntries ? await archive.getEntries() : archive.entries?.() || archive
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const entries: any = archive.getEntries ? await archive.getEntries() : archive.entries?.() || archive
   const isIterable = entries && typeof entries[Symbol.asyncIterator] === 'function'
   const list = isIterable ? [] : entries
   const total = Array.isArray(list) ? list.length : undefined
