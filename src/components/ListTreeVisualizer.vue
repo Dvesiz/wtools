@@ -50,14 +50,23 @@
             <el-tooltip content="清空输入" placement="top">
               <el-button size="small" :icon="Delete" circle @click="clearAll" />
             </el-tooltip>
+            <el-tooltip content="保存" placement="top">
+              <el-button size="small" :icon="Select" circle @click="handleSave" />
+            </el-tooltip>
+            <el-tooltip content="复制内容" placement="top">
+              <el-button size="small" :icon="CopyDocument" circle @click="handleCopy" />
+            </el-tooltip>
           </div>
         </div>
         <div class="textarea-wrapper">
           <el-input
-            v-model="rawText"
+            ref="rawTextInputRef"
+            :model-value="rawText"
             type="textarea"
             placeholder="在此粘贴树形文本..."
             class="mono-textarea"
+            @scroll="captureScroll"
+            @input="onRawTextInput"
           />
         </div>
         <div v-if="errorMsg" class="error-msg">
@@ -106,9 +115,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { captureScroll, preserveScroll } from '../utils/scrollPreserve'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
-import { Upload, Refresh, Delete, Platform, Folder, EditPen, Download, Share, Expand, Fold } from '@element-plus/icons-vue'
+import { Upload, Refresh, Delete, Platform, Folder, EditPen, Download, Share, Expand, Fold, Select, CopyDocument } from '@element-plus/icons-vue'
 import * as d3 from 'd3'
 import { saveAs } from 'file-saver'
 import { getFileIconSVG } from '../utils/fileIcons'
@@ -136,8 +146,13 @@ interface FlatNode {
 
 // ─── State ────────────────────────────────────────────────────────
 const router = useRouter()
-const { content: rawText, isRestored } = useContentCache('list-raw-text', '')
+const { content: rawText, isRestored, save: saveCode } = useContentCache('list-raw-text', '')
 const errorMsg = ref('')
+const rawTextInputRef = ref()
+
+function onRawTextInput(val: string) {
+  preserveScroll(rawTextInputRef, () => { rawText.value = val })
+}
 const nodeCount = ref(0)
 const totalNodeCount = ref(0)
 const rendered = ref(false)
@@ -489,6 +504,20 @@ function clearAll() {
   treeRoot = null
   if (listContainer.value) {
     d3.select(listContainer.value).selectAll('*').remove()
+  }
+}
+
+function handleSave() {
+  saveCode()
+  ElMessage.success('已保存')
+}
+
+async function handleCopy() {
+  try {
+    await navigator.clipboard.writeText(rawText.value)
+    ElMessage.success('内容已复制')
+  } catch {
+    ElMessage.error('复制失败')
   }
 }
 

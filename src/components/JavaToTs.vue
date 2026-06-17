@@ -33,9 +33,20 @@
     <div class="operation-area">
       <el-row :gutter="20">
         <el-col :xs="24" :sm="24" :md="12">
-          <h4>Java DTO 代码输入</h4>
+          <div class="inline-panel-header">
+            <h4>Java DTO 代码输入</h4>
+            <div class="panel-actions">
+              <el-tooltip content="保存" placement="top">
+                <el-button size="small" :icon="Select" circle @click="handleSave" />
+              </el-tooltip>
+              <el-tooltip content="复制代码" placement="top">
+                <el-button size="small" :icon="CopyDocument" circle @click="handleCopy" />
+              </el-tooltip>
+            </div>
+          </div>
           <el-input
-            v-model="javaCode"
+            ref="codeInputRef"
+            :model-value="javaCode"
             type="textarea"
             :rows="20"
             placeholder="粘贴你的 Java 类代码，例如：
@@ -43,6 +54,8 @@ public class RoleResp {
     private Integer id;
     private String name;
 }"
+            @scroll="captureScroll"
+            @input="onCodeInput"
           />
           <div class="action-bar mt-4">
             <el-button type="primary" @click="convertToTs">转换为 TypeScript</el-button>
@@ -69,10 +82,17 @@ public class RoleResp {
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { Select, CopyDocument } from '@element-plus/icons-vue'
 import { useContentCache } from '../utils/contentCache'
+import { captureScroll, preserveScroll } from '../utils/scrollPreserve'
 
-const { content: javaCode } = useContentCache('java-code', '')
+const { content: javaCode, save: saveCode } = useContentCache('java-code', '')
 const tsCode = ref('')
+const codeInputRef = ref()
+
+function onCodeInput(val: string) {
+  preserveScroll(codeInputRef, () => { javaCode.value = val })
+}
 
 const typeMapping: Record<string, string> = {
   'String': 'string',
@@ -221,5 +241,41 @@ const copyToClipboard = async () => {
     ElMessage.error('复制失败，请手动选择复制')
   }
 }
+
+function handleSave() {
+  saveCode()
+  ElMessage.success('代码已保存')
+}
+
+async function handleCopy() {
+  try {
+    await navigator.clipboard.writeText(javaCode.value)
+    ElMessage.success('代码已复制')
+  } catch {
+    ElMessage.error('复制失败')
+  }
+}
 </script>
+
+<style scoped>
+.inline-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 6px;
+}
+.inline-panel-header h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+.inline-panel-header .panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+</style>
 

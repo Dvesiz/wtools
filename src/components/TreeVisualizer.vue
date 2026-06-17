@@ -54,6 +54,12 @@
             <el-tooltip content="清空输入" placement="top">
               <el-button size="small" :icon="Delete" circle @click="clearAll" />
             </el-tooltip>
+            <el-tooltip content="保存" placement="top">
+              <el-button size="small" :icon="Select" circle @click="handleSave" />
+            </el-tooltip>
+            <el-tooltip content="复制 JSON" placement="top">
+              <el-button size="small" :icon="CopyDocument" circle @click="handleCopy" />
+            </el-tooltip>
             <el-tooltip content="图配置" placement="top">
               <el-button
                 size="small"
@@ -105,11 +111,13 @@
         </div>
         <div class="textarea-wrapper">
           <el-input
-            v-model="jsonInput"
+            ref="jsonInputRef"
+            :model-value="jsonInput"
             type="textarea"
             placeholder="在此粘贴 JSON 数据..."
             class="mono-textarea"
-            @input="onInputChange"
+            @scroll="captureScroll"
+            @input="onJsonInput"
           />
         </div>
         <div v-if="errorMsg" class="error-msg">
@@ -169,6 +177,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { captureScroll, preserveScroll } from '../utils/scrollPreserve'
 import { init, use, type EChartsType } from 'echarts/core'
 import { TreeChart } from 'echarts/charts'
 import { TooltipComponent } from 'echarts/components'
@@ -177,7 +186,7 @@ import type { EChartsOption } from 'echarts/types/dist/echarts'
 
 use([TreeChart, TooltipComponent, CanvasRenderer])
 import { ElMessage } from 'element-plus'
-import { Upload, Refresh, Delete, Platform, Share, EditPen, DArrowLeft, DArrowRight, Setting } from '@element-plus/icons-vue'
+import { Upload, Refresh, Delete, Platform, Share, EditPen, DArrowLeft, DArrowRight, Setting, Select, CopyDocument } from '@element-plus/icons-vue'
 import { useContentCache } from '../utils/contentCache'
 
 // --- Config State ---
@@ -187,10 +196,16 @@ const orientation = ref<'TB' | 'LR' | 'RL' | 'BT'>('LR')
 const nodeShape = ref<'circle' | 'rect'>('circle')
 
 // --- Data State ---
-const { content: jsonInput, isRestored } = useContentCache('tree-json-input', '')
+const { content: jsonInput, isRestored, save: saveCode } = useContentCache('tree-json-input', '')
 const errorMsg = ref('')
 const nodeCount = ref(0)
 const chartRendered = ref(false)
+const jsonInputRef = ref()
+
+function onJsonInput(val: string) {
+  preserveScroll(jsonInputRef, () => { jsonInput.value = val })
+  onInputChange()
+}
 
 // --- Resize & Collapse State ---
 const inputWidth = ref(520)
@@ -578,6 +593,20 @@ function clearAll() {
   chartRendered.value = false
   if (chartInstance) {
     chartInstance.clear()
+  }
+}
+
+function handleSave() {
+  saveCode()
+  ElMessage.success('已保存')
+}
+
+async function handleCopy() {
+  try {
+    await navigator.clipboard.writeText(jsonInput.value)
+    ElMessage.success('JSON 已复制')
+  } catch {
+    ElMessage.error('复制失败')
   }
 }
 
