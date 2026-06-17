@@ -114,6 +114,18 @@ body {
   padding: 14px;
 }
 
+/* Shared input/editor/output panel card */
+.panel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: #fafbfc;
+  border: 1px solid #eef0f5;
+  border-radius: 10px;
+  padding: 14px;
+}
+
 .panel-header {
   flex-shrink: 0;
   display: flex;
@@ -121,6 +133,7 @@ body {
   justify-content: space-between;
   margin-bottom: 10px;
   gap: 6px;
+  flex-wrap: wrap;
 }
 .panel-title {
   font-size: 13px;
@@ -128,12 +141,145 @@ body {
   color: #374151;
   display: flex;
   align-items: center;
+  gap: 6px;
 }
 .panel-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  flex-shrink: 0;
   position: relative;
+}
+
+/* ============================
+   Resizable Panel Divider
+   ============================ */
+
+.panel-divider {
+  flex: 0 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: col-resize;
+  position: relative;
+  user-select: none;
+}
+
+.panel-divider::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 100%;
+  background: #e5e7eb;
+  border-radius: 1px;
+  transition: background 0.2s;
+}
+
+.panel-divider:hover::before,
+.panel-divider.dragging::before {
+  background: #5b73e0;
+  width: 3px;
+}
+
+.divider-grip {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 0;
+  z-index: 1;
+}
+
+.grip-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #c4c8d0;
+  transition: background 0.2s;
+}
+
+.panel-divider:hover .grip-dot,
+.panel-divider.dragging .grip-dot {
+  background: #5b73e0;
+}
+
+.divider-btn {
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #f0f1f5;
+  border: 1px solid #e2e5ed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  color: #9ca3af;
+  font-size: 10px;
+}
+
+.divider-btn:hover {
+  background: #eef0ff;
+  border-color: #5b73e0;
+  color: #5b73e0;
+}
+
+/* ============================
+   Expand Strip (collapsed panel)
+   ============================ */
+
+.expand-strip {
+  flex: 0 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.expand-strip::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 100%;
+  background: #e5e7eb;
+  border-radius: 1px;
+  transition: background 0.2s;
+}
+
+.expand-strip:hover::before {
+  background: #5b73e0;
+  width: 3px;
+}
+
+.expand-btn {
+  z-index: 1;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #e2e5ed;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #5b73e0;
+  font-size: 12px;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.expand-btn:hover {
+  background: #eef0ff;
+  border-color: #5b73e0;
 }
 
 /* Shared textarea wrapper with flex fill */
@@ -161,6 +307,10 @@ body {
   align-items: center;
   gap: 6px;
 }
+.node-count.hint {
+  color: #9ca3af;
+  font-style: italic;
+}
 .node-dot {
   width: 6px;
   height: 6px;
@@ -170,8 +320,52 @@ body {
 }
 
 /* ============================
-   Info Button & Popover (tool help)
+   Header Badge
    ============================ */
+.header-badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: #eef0ff;
+  color: #5b73e0;
+  border: 1px solid #d4dcff;
+  line-height: 18px;
+}
+
+/* ============================
+   Main Split Layout (resizable)
+   ============================ */
+.main-layout {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+/* ============================
+   Monospace Code Textarea
+   ============================ */
+.mono-textarea .el-textarea__inner {
+  font-family: ui-monospace, 'SF Mono', Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  border-color: #e2e5ed;
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.mono-textarea .el-textarea__inner:focus {
+  border-color: #5b73e0;
+  box-shadow: 0 0 0 3px rgba(91, 115, 224, 0.1);
+}
+
+/* ============================
+   Unified shell (ZipTool, JavaToTs)
+   ============================ */
+.unified-shell {
+  padding: 24px;
+}
 .info-btn {
   display: inline-flex;
   align-items: center;
