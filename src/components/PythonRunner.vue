@@ -171,10 +171,11 @@ import {
   SuccessFilled, Loading, CircleCloseFilled, InfoFilled,
   DArrowLeft, DArrowRight, Refresh, Delete,
 } from '@element-plus/icons-vue'
-import { basicSetup } from 'codemirror'
-import { EditorView, keymap } from '@codemirror/view'
+import { EditorView, keymap, lineNumbers, drawSelection, highlightActiveLine } from '@codemirror/view'
 import { EditorState } from '@codemirror/state'
-import { indentWithTab } from '@codemirror/commands'
+import { history, defaultKeymap, historyKeymap } from '@codemirror/commands'
+import { indentOnInput, bracketMatching, syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language'
+import { closeBrackets, autocompletion, completionKeymap } from '@codemirror/autocomplete'
 import { python } from '@codemirror/lang-python'
 import { pythonEditorTheme } from '../utils/editor-theme'
 import type { StepState } from '../utils/pyodide/pyodideManager'
@@ -203,34 +204,24 @@ function createEditor() {
   const startState = EditorState.create({
     doc: code.value,
     extensions: [
-      basicSetup,
+      lineNumbers(),
+      drawSelection(),
+      highlightActiveLine(),
+      EditorState.allowMultipleSelections.of(true),
+      history(),
+      indentOnInput(),
+      bracketMatching(),
+      closeBrackets(),
+      autocompletion(),
+      syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
       python(),
-      EditorView.lineWrapping,
       pythonEditorTheme,
-      keymap.of([indentWithTab]),
-      // Sync editor changes back to code ref, but skip during IME composition
-      EditorView.updateListener.of((update) => {
-        if (update.docChanged && !isComposing) {
-          suppressCodeSync = true
-          code.value = update.state.doc.toString()
-          suppressCodeSync = false
-        }
-      }),
-      // Track IME composition to prevent interference with input sync
-      EditorView.domEventHandlers({
-        compositionstart() { isComposing = true; return false },
-        compositionend() {
-          isComposing = false
-          // Composition finished — CM6 already applied the final text,
-          // but updateListener was skipping, so sync the final state
-          if (editorView) {
-            suppressCodeSync = true
-            code.value = editorView.state.doc.toString()
-            suppressCodeSync = false
-          }
-          return false
-        },
-      }),
+      EditorView.lineWrapping,
+      keymap.of([
+        ...defaultKeymap,
+        ...historyKeymap,
+        ...completionKeymap,
+      ]),
     ],
   })
   editorView = new EditorView({
