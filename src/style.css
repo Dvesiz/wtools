@@ -11,12 +11,85 @@ body {
 }
 
 /* ============================
+   Responsive: global shared
+   ============================ */
+
+/* Mobile: stack split panels vertically */
+@media (max-width: 767px) {
+  /* Prevent any component from exceeding viewport width */
+  .tool-page {
+    overflow-x: hidden;
+  }
+  /* Allow header elements to wrap on narrow screens */
+  .header-top {
+    flex-wrap: wrap;
+  }
+  .main-layout {
+    flex-direction: column !important;
+    overflow-y: auto;
+    max-width: 100%;
+  }
+  .main-layout > .input-panel,
+  .main-layout > .panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+    min-height: 240px;
+  }
+  /* Right panels: explicitly full width in column layout */
+  .main-layout > .chart-panel,
+  .main-layout > .list-panel,
+  .main-layout > .output-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+  }
+  .chart-panel {
+    min-height: 350px;
+  }
+  .list-panel {
+    min-height: 350px;
+  }
+  .main-layout > .panel.output-panel {
+    min-height: 300px;
+  }
+  .panel-divider,
+  .expand-strip {
+    display: none !important;
+  }
+  .tool-shell {
+    padding: 16px !important;
+    max-width: 100% !important;
+    overflow-x: hidden;
+  }
+  /* Element Plus el-row gutter negative margins → overflow */
+  .el-row--flex {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .el-row--flex .el-col {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  /* Don't let operation-area shrink its children below viewport */
+  .operation-area {
+    overflow-x: hidden;
+  }
+  .file-list {
+    overflow-x: auto;
+  }
+}
+
+/* ============================
    Shared Tool Shell Styles
    ============================ */
 
 /* Tool card container */
 .tool-shell {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   border-radius: 12px;
   background: #fff;
   box-shadow:
@@ -167,7 +240,8 @@ body {
   user-select: none;
 }
 
-.panel-divider::before {
+.panel-divider::before,
+.expand-strip::before {
   content: '';
   position: absolute;
   top: 0;
@@ -181,7 +255,8 @@ body {
 }
 
 .panel-divider:hover::before,
-.panel-divider.dragging::before {
+.panel-divider.dragging::before,
+.expand-strip:hover::before {
   background: #5b73e0;
   width: 3px;
 }
@@ -240,24 +315,6 @@ body {
   justify-content: center;
   cursor: pointer;
   position: relative;
-}
-
-.expand-strip::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2px;
-  height: 100%;
-  background: #e5e7eb;
-  border-radius: 1px;
-  transition: background 0.2s;
-}
-
-.expand-strip:hover::before {
-  background: #5b73e0;
-  width: 3px;
 }
 
 .expand-btn {

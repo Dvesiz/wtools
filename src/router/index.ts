@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/', redirect: '/tree-visualizer' },
     { path: '/java-to-ts',      name: 'java-to-ts',      component: () => import('../views/JavaToTsView.vue') },

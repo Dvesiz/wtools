@@ -39,6 +39,11 @@
             树形文本输入
           </span>
           <div class="panel-actions">
+            <el-upload :show-file-list="false" :auto-upload="false" accept=".txt,.md" :on-change="handleFileUpload">
+              <el-tooltip content="上传 .txt 文件" placement="top">
+                <el-button size="small" :icon="Upload" circle />
+              </el-tooltip>
+            </el-upload>
             <el-tooltip content="加载示例数据" placement="top">
               <el-button size="small" :icon="Refresh" circle @click="loadSample" />
             </el-tooltip>
@@ -103,7 +108,7 @@
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
-import { Refresh, Delete, Platform, Folder, EditPen, Download, Share, Expand, Fold } from '@element-plus/icons-vue'
+import { Upload, Refresh, Delete, Platform, Folder, EditPen, Download, Share, Expand, Fold } from '@element-plus/icons-vue'
 import * as d3 from 'd3'
 import { saveAs } from 'file-saver'
 import { getFileIconSVG } from '../utils/fileIcons'
@@ -457,6 +462,24 @@ function sendToTreeVisualizer() {
   ElMessage.success('数据已发送至树形结构可视化工具')
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function handleFileUpload(uploadFile: any) {
+  const file = uploadFile.raw
+  if (!file) return
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    const text = e.target?.result as string
+    if (text.trim()) {
+      rawText.value = text
+      ElMessage.success('文件已加载')
+    } else {
+      ElMessage.error('文件内容为空')
+    }
+  }
+  reader.readAsText(file)
+}
+
 function clearAll() {
   rawText.value = ''
   errorMsg.value = ''
@@ -482,10 +505,6 @@ onMounted(() => {
 
 <style scoped>
 .list-shell {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
   padding: 24px;
 }
 
@@ -652,6 +671,11 @@ onMounted(() => {
   font-style: italic;
   font-size: 12px;
   color: #9ca3af;
+}
+
+/* ── Wider input panel ── */
+.list-shell .input-panel {
+  width: 480px;
 }
 
 </style>

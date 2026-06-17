@@ -197,6 +197,7 @@ const editorRef = ref<HTMLDivElement>()
 let editorView: EditorView | null = null
 let suppressCodeSync = false
 let resizeObserver: ResizeObserver | null = null
+let isComposing = false
 
 function createEditor() {
   const startState = EditorState.create({
@@ -207,12 +208,28 @@ function createEditor() {
       EditorView.lineWrapping,
       pythonEditorTheme,
       keymap.of([indentWithTab]),
+      // Sync editor changes back to code ref, but skip during IME composition
       EditorView.updateListener.of((update) => {
-        if (update.docChanged) {
+        if (update.docChanged && !isComposing) {
           suppressCodeSync = true
           code.value = update.state.doc.toString()
           suppressCodeSync = false
         }
+      }),
+      // Track IME composition to prevent interference with input sync
+      EditorView.domEventHandlers({
+        compositionstart() { isComposing = true; return false },
+        compositionend() {
+          isComposing = false
+          // Composition finished — CM6 already applied the final text,
+          // but updateListener was skipping, so sync the final state
+          if (editorView) {
+            suppressCodeSync = true
+            code.value = editorView.state.doc.toString()
+            suppressCodeSync = false
+          }
+          return false
+        },
       }),
     ],
   })
@@ -227,7 +244,7 @@ function createEditor() {
 }
 
 watch(code, (newVal) => {
-  if (suppressCodeSync || !editorView) return
+  if (suppressCodeSync || !editorView || isComposing) return
   const sel = editorView.state.selection.main
   editorView.dispatch({
     changes: { from: 0, to: editorView.state.doc.length, insert: newVal },
@@ -424,10 +441,6 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .python-shell {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
   padding: 20px;
 }
 

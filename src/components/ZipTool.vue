@@ -45,7 +45,7 @@
           </el-upload>
 
           <div v-if="compressFiles.length > 0" class="action-bar">
-            <el-input v-model="zipFileName" placeholder="输入压缩包名 (默认: archive.zip)" style="width: 260px; margin-right: 12px;" />
+            <el-input v-model="zipFileName" placeholder="输入压缩包名 (默认: archive.zip)" class="zip-name-input" />
             <el-button type="primary" :loading="isCompressing" @click="doCompress">压缩并下载</el-button>
           </div>
 
@@ -94,8 +94,8 @@
             <h4>包含的文件:</h4>
             <el-table :data="unzippedFiles" border style="width: 100%">
               <el-table-column prop="name" label="文件名" />
-              <el-table-column prop="size" label="大小 (Bytes)" width="150" />
-              <el-table-column label="操作" width="120">
+              <el-table-column prop="size" label="大小 (Bytes)" min-width="110" />
+              <el-table-column label="操作" min-width="90">
                 <template #default="scope">
                   <el-button size="small" @click="downloadFile(scope.row)">下载</el-button>
                 </template>
@@ -235,5 +235,17 @@ const downloadFile = (fileObj: { name: string; data: Uint8Array }) => {
 }
 :deep(.el-tabs__active-bar) {
   background-color: #5b73e0;
+}
+
+.zip-name-input {
+  width: 260px;
+  margin-right: 12px;
+}
+@media (max-width: 767px) {
+  .zip-name-input {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 8px;
+  }
 }
 </style>

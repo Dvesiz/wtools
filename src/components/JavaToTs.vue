@@ -32,7 +32,7 @@
     </div>
     <div class="operation-area">
       <el-row :gutter="20">
-        <el-col :span="12">
+        <el-col :xs="24" :sm="24" :md="12">
           <h4>Java DTO 代码输入</h4>
           <el-input
             v-model="javaCode"
@@ -48,7 +48,7 @@ public class RoleResp {
             <el-button type="primary" @click="convertToTs">转换为 TypeScript</el-button>
           </div>
         </el-col>
-        <el-col :span="12">
+        <el-col :xs="24" :sm="24" :md="12">
           <h4>TypeScript 输出</h4>
           <el-input
             v-model="tsCode"
@@ -223,4 +223,3 @@ const copyToClipboard = async () => {
 }
 </script>
 
-<style scoped></style>

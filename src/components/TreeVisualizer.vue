@@ -169,7 +169,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import * as echarts from 'echarts'
+import { init, use, type EChartsType } from 'echarts/core'
+import { TreeChart } from 'echarts/charts'
+import { TooltipComponent } from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
+import type { EChartsOption } from 'echarts/types/dist/echarts'
+
+use([TreeChart, TooltipComponent, CanvasRenderer])
 import { ElMessage } from 'element-plus'
 import { Upload, Refresh, Delete, Platform, Share, EditPen, DArrowLeft, DArrowRight, Setting } from '@element-plus/icons-vue'
 import { useContentCache } from '../utils/contentCache'
@@ -187,7 +193,7 @@ const nodeCount = ref(0)
 const chartRendered = ref(false)
 
 // --- Resize & Collapse State ---
-const inputWidth = ref(380)
+const inputWidth = ref(520)
 const inputVisible = ref(true)
 const isResizing = ref(false)
 const mainLayoutRef = ref<HTMLDivElement>()
@@ -246,7 +252,7 @@ function onDocumentClick(e: MouseEvent) {
 
 // --- Refs ---
 const chartContainer = ref<HTMLDivElement>()
-let chartInstance: echarts.ECharts | null = null
+let chartInstance: EChartsType | null = null
 let chartResizeTimer: ReturnType<typeof setTimeout> | undefined
 
 // --- Sample Data ---
@@ -440,7 +446,7 @@ function renderChart() {
 
   // Initialize chart if needed
   if (!chartInstance) {
-    chartInstance = echarts.init(chartContainer.value)
+    chartInstance = init(chartContainer.value)
   }
 
   const isLR = orientation.value === 'LR' || orientation.value === 'RL'
@@ -448,7 +454,7 @@ function renderChart() {
   // Determine initial tree depth based on total nodes
   const initialDepth = nodeCount.value > 50 ? 2 : nodeCount.value > 20 ? 3 : 4
 
-  const option: echarts.EChartsOption = {
+  const option: EChartsOption = {
     backgroundColor: 'transparent',
     tooltip: {
       trigger: 'item',
@@ -617,10 +623,6 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .tree-shell {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
   padding: 24px;
 }
 
