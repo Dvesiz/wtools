@@ -4,6 +4,25 @@ export type ArchiveFile = {
   data: Uint8Array
 }
 
+// ── 单文件 Uint8Array 压缩 / 解压 ──
+
+/** 用 JSZip DEFLATE 压缩单个 Uint8Array */
+export const compressUint8Array = async (data: Uint8Array): Promise<Uint8Array> => {
+  const { default: JSZip } = await import('jszip')
+  const zip = new JSZip()
+  zip.file('data', data, { compression: 'DEFLATE' })
+  return zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' })
+}
+
+/** 解压单个 Uint8Array（compressUint8Array 的逆操作） */
+export const decompressUint8Array = async (compressed: Uint8Array): Promise<Uint8Array> => {
+  const { default: JSZip } = await import('jszip')
+  const zip = await JSZip.loadAsync(compressed)
+  return zip.file('data')!.async('uint8array')
+}
+
+// ── 多文件压缩 / 解压 ──
+
 export const compressZip = async (
   files: { raw: File }[],
   onProgress?: (percent: number) => void
