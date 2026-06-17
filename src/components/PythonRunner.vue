@@ -52,6 +52,12 @@
             <el-tooltip content="清空输入" placement="top">
               <el-button size="small" :icon="Delete" circle :disabled="running" @click="clearCode" />
             </el-tooltip>
+            <el-tooltip content="保存" placement="top">
+              <el-button size="small" :icon="Select" circle @click="handleSave" />
+            </el-tooltip>
+            <el-tooltip content="复制代码" placement="top">
+              <el-button size="small" :icon="CopyDocument" circle @click="handleCopy" />
+            </el-tooltip>
           </div>
         </div>
         <div ref="editorRef" class="cm-editor-wrap" />
@@ -163,13 +169,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useContentCache } from '../utils/contentCache'
+import { ElMessage } from 'element-plus'
 import { ansiToHtml } from '../utils/ansiToHtml'
 import {
   Monitor, EditPen, VideoPlay, ChatLineSquare,
   SuccessFilled, Loading, CircleCloseFilled, InfoFilled,
-  DArrowLeft, DArrowRight, Refresh, Delete,
+  DArrowLeft, DArrowRight, Refresh, Delete, Select, CopyDocument,
 } from '@element-plus/icons-vue'
 import { EditorView, keymap, lineNumbers, drawSelection, highlightActiveLine } from '@codemirror/view'
 import { EditorState } from '@codemirror/state'
@@ -188,7 +195,7 @@ import {
 
 // ── Editor / output state ──
 
-const { content: code } = useContentCache('python-code', DEFAULT_CODE)
+const { content: code, save: saveCode } = useContentCache('python-code', DEFAULT_CODE)
 const output = ref('')
 const running = ref(false)
 
@@ -196,9 +203,7 @@ const running = ref(false)
 
 const editorRef = ref<HTMLDivElement>()
 let editorView: EditorView | null = null
-let suppressCodeSync = false
 let resizeObserver: ResizeObserver | null = null
-let isComposing = false
 
 function createEditor() {
   const startState = EditorState.create({
@@ -217,6 +222,11 @@ function createEditor() {
       python(),
       pythonEditorTheme,
       EditorView.lineWrapping,
+      EditorView.updateListener.of((update) => {
+        if (update.docChanged) {
+          code.value = update.state.doc.toString()
+        }
+      }),
       keymap.of([
         ...defaultKeymap,
         ...historyKeymap,
@@ -234,14 +244,15 @@ function createEditor() {
   resizeObserver.observe(editorRef.value!)
 }
 
-watch(code, (newVal) => {
-  if (suppressCodeSync || !editorView || isComposing) return
-  const sel = editorView.state.selection.main
-  editorView.dispatch({
-    changes: { from: 0, to: editorView.state.doc.length, insert: newVal },
-    selection: { anchor: Math.min(sel.anchor, newVal.length) },
-  })
-})
+/** 手动同步外部代码到编辑器（代替被移除的 watch，避免 IME 冲突） */
+function syncCodeToEditor(val: string) {
+  if (!editorView) return
+  if (editorView.state.doc.toString() !== val) {
+    editorView.dispatch({
+      changes: { from: 0, to: editorView.state.doc.length, insert: val },
+    })
+  }
+}
 
 // ── Init state ──
 
@@ -354,10 +365,26 @@ async function runCode() {
 
 function resetCode() {
   code.value = DEFAULT_CODE
+  syncCodeToEditor(code.value)
 }
 
 function clearCode() {
   code.value = ''
+  syncCodeToEditor(code.value)
+}
+
+function handleSave() {
+  saveCode()
+  ElMessage.success('代码已保存')
+}
+
+async function handleCopy() {
+  try {
+    await navigator.clipboard.writeText(code.value)
+    ElMessage.success('代码已复制')
+  } catch {
+    ElMessage.error('复制失败')
+  }
 }
 
 // ── Retry / reset ──
