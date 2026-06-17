@@ -11,8 +11,10 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
+    "@codemirror/lang-python": "^6.2.1",
     "@element-plus/icons-vue": "^2.3.1",
     "@types/d3": "^7.4.3",
+    "codemirror": "^6.0.2",
     "d3": "^7.9.0",
     "echarts": "^6.1.0",
     "element-plus": "^2.13.6",

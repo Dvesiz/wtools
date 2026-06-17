@@ -25,6 +25,10 @@
             <el-icon><Folder /></el-icon>
             <span>树列表可视化</span>
           </el-menu-item>
+          <el-menu-item index="/python-runner">
+            <el-icon><Monitor /></el-icon>
+            <span>Python 在线运行</span>
+          </el-menu-item>
         </el-menu>
       </el-aside>
 
@@ -92,7 +96,7 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { Document, DataAnalysis, Share, Folder } from '@element-plus/icons-vue'
+import { Document, DataAnalysis, Share, Folder, Monitor } from '@element-plus/icons-vue'
 
 const route = useRoute()
 </script>
