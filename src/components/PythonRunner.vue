@@ -260,7 +260,11 @@ const initPhaseLabel = computed(() => {
 
 // Formatted output with ANSI → HTML conversion
 const formattedOutput = computed(() => {
-  if (running.value) return '▶ 运行中...'
+  if (running.value) {
+    // Show loading/progress messages as they arrive, with a running indicator
+    if (output.value) return ansiToHtml(output.value) + '\n\n▶ 运行中...'
+    return '▶ 运行中...'
+  }
   if (output.value) return ansiToHtml(output.value)
   return '点击「运行」执行代码'
 })
@@ -331,9 +335,13 @@ async function runCode() {
   running.value = true
   output.value = ''
   try {
-    output.value = await runPythonCode(code.value, (msg) => {
+    const result = await runPythonCode(code.value, (msg) => {
       output.value += msg + '\n'
     })
+    // 附加 Python 执行输出（保留之前的加载消息）
+    if (result) {
+      output.value += result
+    }
     if (!output.value) {
       output.value = '(无输出)'
     }
