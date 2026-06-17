@@ -39,7 +39,7 @@
       <div v-show="inputVisible" class="input-panel" :style="{ width: inputWidth + 'px', flex: 'none' }">
         <div class="panel-header">
           <span class="panel-title">
-            <el-icon style="margin-right: 6px"><EditPen /></el-icon>
+            <el-icon><EditPen /></el-icon>
             JSON 输入
           </span>
           <div ref="configTriggerRef" class="panel-actions">
@@ -108,7 +108,7 @@
             v-model="jsonInput"
             type="textarea"
             placeholder="在此粘贴 JSON 数据..."
-            class="json-textarea"
+            class="mono-textarea"
             @input="onInputChange"
           />
         </div>
@@ -172,6 +172,7 @@ import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import * as echarts from 'echarts'
 import { ElMessage } from 'element-plus'
 import { Upload, Refresh, Delete, Platform, Share, EditPen, DArrowLeft, DArrowRight, Setting } from '@element-plus/icons-vue'
+import { useContentCache } from '../utils/contentCache'
 
 // --- Config State ---
 const labelField = ref('name')
@@ -180,7 +181,7 @@ const orientation = ref<'TB' | 'LR' | 'RL' | 'BT'>('LR')
 const nodeShape = ref<'circle' | 'rect'>('circle')
 
 // --- Data State ---
-const jsonInput = ref('')
+const { content: jsonInput, isRestored } = useContentCache('tree-json-input', '')
 const errorMsg = ref('')
 const nodeCount = ref(0)
 const chartRendered = ref(false)
@@ -600,8 +601,10 @@ onMounted(() => {
     } catch { /* ignore */ }
   }
 
-  // Load sample data on first visit
-  loadSampleData()
+  // Load sample data only on first-time visit (no cache)
+  if (!isRestored) {
+    loadSampleData()
+  }
 })
 
 onBeforeUnmount(() => {
@@ -627,16 +630,6 @@ onBeforeUnmount(() => {
 .tree-shell :deep(.shell-header) {
   flex-shrink: 0;
   margin-bottom: 18px;
-}
-.header-badge {
-  font-size: 11px;
-  font-weight: 500;
-  padding: 1px 8px;
-  border-radius: 10px;
-  background: #eef0ff;
-  color: #5b73e0;
-  border: 1px solid #d4dcff;
-  line-height: 18px;
 }
 
 /* ============================
@@ -690,227 +683,12 @@ onBeforeUnmount(() => {
   border-color: #d4dcff !important;
 }
 
-/* ============================
-   Main Layout
-   ============================ */
-.main-layout {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-  position: relative;
-}
-
-/* ============================
-   Input Panel
-   ============================ */
-.input-panel {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  background: #fafbfc;
-  border: 1px solid #eef0f5;
-  border-radius: 10px;
-  padding: 14px;
-}
-
-.panel-header {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.panel-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #374151;
-  display: flex;
-  align-items: center;
-}
-.panel-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  position: relative;
-}
-
-.textarea-wrapper {
-  flex: 1;
-  display: flex;
-  min-height: 0;
-}
-.json-textarea {
-  flex: 1;
-  font-family: ui-monospace, 'SF Mono', Consolas, monospace;
-  font-size: 13px;
-  line-height: 1.6;
-}
-.json-textarea :deep(.el-textarea__inner) {
-  font-family: inherit;
-  height: 100% !important;
-  border-color: #e2e5ed;
-  border-radius: 8px;
-  padding: 12px 14px;
-  background: #fff;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  resize: none;
-}
-.json-textarea :deep(.el-textarea__inner:focus) {
-  border-color: #5b73e0;
-  box-shadow: 0 0 0 3px rgba(91, 115, 224, 0.1);
-}
-
-.error-msg {
-  flex-shrink: 0;
-  margin-top: 10px;
-}
-
 .render-bar {
   flex-shrink: 0;
   margin-top: 12px;
   display: flex;
   align-items: center;
   gap: 12px;
-}
-.node-count {
-  font-size: 12px;
-  color: #6b7280;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.node-count.hint {
-  color: #9ca3af;
-  font-style: italic;
-}
-.node-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #5b73e0;
-  display: inline-block;
-}
-
-/* ============================
-   Panel Divider (draggable split bar)
-   ============================ */
-.panel-divider {
-  flex: 0 0 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  cursor: col-resize;
-  position: relative;
-  user-select: none;
-}
-.panel-divider::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2px;
-  height: 100%;
-  background: #e5e7eb;
-  border-radius: 1px;
-  transition: background 0.2s;
-}
-.panel-divider:hover::before,
-.panel-divider.dragging::before {
-  background: #5b73e0;
-  width: 3px;
-}
-
-.divider-grip {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 6px 0;
-  z-index: 1;
-}
-.grip-dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #c4c8d0;
-  transition: background 0.2s;
-}
-.panel-divider:hover .grip-dot,
-.panel-divider.dragging .grip-dot {
-  background: #5b73e0;
-}
-
-.divider-btn {
-  z-index: 1;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #f0f1f5;
-  border: 1px solid #e2e5ed;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
-  color: #9ca3af;
-  font-size: 10px;
-}
-.divider-btn:hover {
-  background: #eef0ff;
-  border-color: #5b73e0;
-  color: #5b73e0;
-}
-
-/* ============================
-   Collapsed Expand Strip
-   ============================ */
-.expand-strip {
-  flex: 0 0 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  position: relative;
-}
-.expand-strip::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2px;
-  height: 100%;
-  background: #e5e7eb;
-  border-radius: 1px;
-  transition: background 0.2s;
-}
-.expand-strip:hover::before {
-  background: #5b73e0;
-  width: 3px;
-}
-.expand-btn {
-  z-index: 1;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #fff;
-  border: 1px solid #e2e5ed;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #5b73e0;
-  font-size: 12px;
-  transition: background 0.2s, border-color 0.2s;
-}
-.expand-btn:hover {
-  background: #eef0ff;
-  border-color: #5b73e0;
 }
 
 /* ============================

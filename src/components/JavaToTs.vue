@@ -69,8 +69,9 @@ public class RoleResp {
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useContentCache } from '../utils/contentCache'
 
-const javaCode = ref('')
+const { content: javaCode } = useContentCache('java-code', '')
 const tsCode = ref('')
 
 const typeMapping: Record<string, string> = {
@@ -222,8 +223,4 @@ const copyToClipboard = async () => {
 }
 </script>
 
-<style scoped>
-.unified-shell {
-  padding: 24px;
-}
-</style>
+<style scoped></style>

@@ -113,8 +113,8 @@ import { computed, ref } from 'vue'
 import { saveAs } from 'file-saver'
 import { ElMessage } from 'element-plus'
 import { UploadFilled } from '@element-plus/icons-vue'
-import { ARCHIVE_EXTENSIONS, decompressArchive } from '../tools/archive/libarchive'
-import { compressZip, decompressZip } from '../tools/archive/zip'
+import { ARCHIVE_EXTENSIONS, decompressArchive } from '../utils/archive/libarchive'
+import { compressZip, decompressZip } from '../utils/archive/zip'
 
 const activeTab = ref('compress')
 
@@ -207,10 +207,6 @@ const downloadFile = (fileObj: { name: string; data: Uint8Array }) => {
 </script>
 
 <style scoped>
-.unified-shell {
-  padding: 24px;
-}
-
 .file-list {
   margin-top: 18px;
 }

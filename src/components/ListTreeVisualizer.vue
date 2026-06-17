@@ -35,7 +35,7 @@
       <div class="input-panel">
         <div class="panel-header">
           <span class="panel-title">
-            <el-icon style="margin-right: 6px"><EditPen /></el-icon>
+            <el-icon><EditPen /></el-icon>
             树形文本输入
           </span>
           <div class="panel-actions">
@@ -52,7 +52,7 @@
             v-model="rawText"
             type="textarea"
             placeholder="在此粘贴树形文本..."
-            class="tree-textarea"
+            class="mono-textarea"
           />
         </div>
         <div v-if="errorMsg" class="error-msg">
@@ -107,6 +107,7 @@ import { Refresh, Delete, Platform, Folder, EditPen, Download, Share, Expand, Fo
 import * as d3 from 'd3'
 import { saveAs } from 'file-saver'
 import { getFileIconSVG } from '../utils/fileIcons'
+import { useContentCache } from '../utils/contentCache'
 
 // ─── Types ────────────────────────────────────────────────────────
 interface TreeNode {
@@ -130,7 +131,7 @@ interface FlatNode {
 
 // ─── State ────────────────────────────────────────────────────────
 const router = useRouter()
-const rawText = ref('')
+const { content: rawText, isRestored } = useContentCache('list-raw-text', '')
 const errorMsg = ref('')
 const nodeCount = ref(0)
 const totalNodeCount = ref(0)
@@ -474,7 +475,9 @@ onBeforeUnmount(() => {
   }
 })
 
-onMounted(() => loadSample())
+onMounted(() => {
+  if (!isRestored) loadSample()
+})
 </script>
 
 <style scoped>
@@ -487,29 +490,7 @@ onMounted(() => loadSample())
 }
 
 .main-layout {
-  display: flex;
-  flex: 1;
-  min-height: 0;
   gap: 16px;
-}
-
-.tree-textarea {
-  flex: 1;
-  font-family: ui-monospace, 'SF Mono', Consolas, monospace;
-  font-size: 13px;
-  line-height: 1.6;
-}
-.tree-textarea :deep(.el-textarea__inner) {
-  font-family: inherit;
-  border-color: #e2e5ed;
-  border-radius: 8px;
-  padding: 12px 14px;
-  background: #fff;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.tree-textarea :deep(.el-textarea__inner:focus) {
-  border-color: #5b73e0;
-  box-shadow: 0 0 0 3px rgba(91, 115, 224, 0.1);
 }
 
 .export-bar {
