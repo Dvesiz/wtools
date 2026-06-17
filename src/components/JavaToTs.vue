@@ -244,7 +244,7 @@ const copyToClipboard = async () => {
 
 function handleSave() {
   saveCode()
-  ElMessage.success('代码已保存')
+  ElMessage.success('已临时保存到浏览器中')
 }
 
 async function handleCopy() {
