@@ -15,15 +15,15 @@
               <div class="info-body">
                 <div class="info-section">
                   <div class="info-label">功能</div>
-                  <div class="info-text">基于 Pyodide 的浏览器端 Python 解释器。代码在本地运行，不经过任何服务器。</div>
+                  <div class="info-text">基于 Pyodide WASM 的浏览器端 Python 解释器。代码在本地运行，无需后端服务器。支持 Python 标准库及 numpy/pandas/opencv-python 等第三方库按需加载。</div>
                 </div>
                 <div class="info-section">
                   <div class="info-label">首次使用</div>
-                  <div class="info-text">自动从 GitHub 下载 Pyodide 运行时 (~30MB)，解压后缓存到 IndexedDB，一次下载永久使用。</div>
+                  <div class="info-text">自动从 CDN 下载 Pyodide WASM 运行时 (~30MB)，缓存到 IndexedDB，一次下载永久使用。后续打开即用无需重复下载。</div>
                 </div>
                 <div class="info-section">
                   <div class="info-label">操作说明</div>
-                  <div class="info-text">在编辑器中编写 Python 代码，点击「运行」执行。支持所有 Python 标准库。可拖动分隔条调整编辑区/运行区大小，点击分隔条箭头可收起编辑区。</div>
+                  <div class="info-text">使用 CodeMirror 6 编辑器编写 Python 代码，支持语法高亮、自动补全、行号显示。点击「运行」执行，输出实时显示。可拖动分隔条调整编辑区/输出区宽度。</div>
                 </div>
               </div>
             </el-popover>

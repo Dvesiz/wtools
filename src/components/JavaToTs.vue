@@ -14,15 +14,15 @@
               <div class="info-body">
                 <div class="info-section">
                   <div class="info-label">功能</div>
-                  <div class="info-text">快速将 Java DTO / VO 代码解析并转换为 TypeScript 接口定义。</div>
+                  <div class="info-text">快速将 Java DTO / VO 代码解析并转换为 TypeScript 接口定义，支持常见类型映射和泛型处理。</div>
                 </div>
                 <div class="info-section">
                   <div class="info-label">类型映射</div>
-                  <div class="info-text">String → string · Integer/Long → number · Boolean → boolean · List&lt;T&gt; → T[] · Map → Record</div>
+                  <div class="info-text">String → string · Integer/Long → number · Boolean → boolean · List&lt;T&gt; → T[] · Map → Record · Date/LocalDate → string</div>
                 </div>
                 <div class="info-section">
                   <div class="info-label">注意事项</div>
-                  <div class="info-text">无法识别的自定义类型会标记 FIXME 注释，需要手动补充类型定义。</div>
+                  <div class="info-text">无法识别的自定义类型会标记 FIXME 注释，需手动补充类型定义。支持 private/protected/public 修饰符，自动跳过注解行和注释行。</div>
                 </div>
               </div>
             </el-popover>

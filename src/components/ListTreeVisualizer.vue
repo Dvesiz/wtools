@@ -14,15 +14,15 @@
               <div class="info-body">
                 <div class="info-section">
                   <div class="info-label">功能</div>
-                  <div class="info-text">将文本格式的树形结构（如目录树、模块清单）渲染为可折叠的列表视图。</div>
+                  <div class="info-text">将文本格式的树形结构（如目录树、模块清单）渲染为可折叠的 D3 列表视图，支持文件图标识别与内联注释。</div>
                 </div>
                 <div class="info-section">
                   <div class="info-label">输入格式</div>
-                  <div class="info-text">使用 ├─ └─ │ 等制表符绘制的树形文本，各层级深度由前缀缩进决定。</div>
+                  <div class="info-text">使用 ├─ └─ │ 等制表符绘制的树形文本，各层级深度由前缀缩进决定。注释行以 # 开头，内联注释使用「 # 」分隔。</div>
                 </div>
                 <div class="info-section">
-                  <div class="info-label">导出</div>
-                  <div class="info-text">支持导出 TreeVisualizer 兼容的 JSON 格式，可直接在树形结构可视化中打开。</div>
+                  <div class="info-label">导出功能</div>
+                  <div class="info-text">支持导出为 TreeVisualizer 兼容的 JSON 格式，可直接在「树形结构可视化」工具中打开继续编辑。</div>
                 </div>
               </div>
             </el-popover>

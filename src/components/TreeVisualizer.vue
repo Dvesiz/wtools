@@ -15,15 +15,15 @@
               <div class="info-body">
                 <div class="info-section">
                   <div class="info-label">功能</div>
-                  <div class="info-text">将 JSON 数据渲染为可交互的树形结构图，支持自定义字段映射与布局选项。</div>
+                  <div class="info-text">将 JSON 数据渲染为 ECharts 可交互树形结构图，支持自定义节点标签/子级字段映射、4 种布局方向与节点样式选择。</div>
                 </div>
                 <div class="info-section">
                   <div class="info-label">交互操作</div>
-                  <div class="info-text">点击节点展开/折叠 · 滚轮缩放 · 拖拽平移 · 悬停查看完整属性。</div>
+                  <div class="info-text">点击节点展开/折叠 · 滚轮缩放 · 拖拽平移 · 悬停查看完整属性 · 可拖拽调整输入面板宽度。</div>
                 </div>
                 <div class="info-section">
-                  <div class="info-label">注意事项</div>
-                  <div class="info-text">JSON 需为嵌套结构，默认使用 name/children 字段。超大节点数（1000+）可能影响性能。</div>
+                  <div class="info-label">字段配置</div>
+                  <div class="info-text">JSON 需为嵌套结构，默认使用 name/children 字段。可通过齿轮图标自定义字段映射、布局方向（LR/TB/RL/BT）和节点形状（圆/矩形）。</div>
                 </div>
               </div>
             </el-popover>

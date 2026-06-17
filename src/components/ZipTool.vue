@@ -14,11 +14,11 @@
               <div class="info-body">
                 <div class="info-section">
                   <div class="info-label">功能</div>
-                  <div class="info-text">ZIP 文件压缩与解压，支持多文件拖拽打包、进度显示、常见归档格式解压。</div>
+                  <div class="info-text">ZIP 文件压缩与多格式解压。支持多文件拖拽打包、实时进度反馈。解压支持 ZIP/RAR/7z/TAR/GZ/XZ/BZ2 等常见归档格式。</div>
                 </div>
                 <div class="info-section">
                   <div class="info-label">注意事项</div>
-                  <div class="info-text">压缩仅支持 ZIP 格式。解压支持 zip/rar/7z/tar/gz/xz/bz2。需浏览器支持 WebAssembly。</div>
+                  <div class="info-text">压缩仅支持 ZIP 格式。解压利用浏览器 WebAssembly 能力（libarchive.js），无需后端服务。所有操作在本地完成，文件不会上传至任何服务器。</div>
                 </div>
               </div>
             </el-popover>
