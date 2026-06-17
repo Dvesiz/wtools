@@ -11,7 +11,7 @@
 [![ECharts 6](https://img.shields.io/badge/ECharts_6-AA344D?logo=apacheecharts&logoColor=white)]()
 [![Pyodide](https://img.shields.io/badge/Pyodide_WASM-005B96?logo=python&logoColor=white)]()
 
-📖 [English](docs/README.md) · [中文](docs/README.zh-CN.md)
+[中文](README.zh-CN.md)
 
 </div>
 
@@ -60,6 +60,7 @@ npm run lint       # Lint code
 | Archive | [JSZip](https://stuk.github.io/jszip/) · [libarchive.js](https://github.com/nickdesaulniers/libarchive.js) |
 
 ---
+
 <div align="center">
   <sub>Built with Vue 3 + Vite + ECharts · <a href="https://github.com/Danburen/wtools">GitHub</a></sub>
 </div>
