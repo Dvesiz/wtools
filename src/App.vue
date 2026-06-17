@@ -13,6 +13,10 @@
       <div class="drawer-menu">
         <div class="logo">实用前端工具</div>
         <el-menu :default-active="route.path" router @select="drawerOpen = false">
+          <el-menu-item index="/">
+            <el-icon><HomeFilled /></el-icon>
+            <span>首页总览</span>
+          </el-menu-item>
           <el-menu-item index="/java-to-ts">
             <el-icon><DataAnalysis /></el-icon>
             <span>Java DTO 转 TS</span>
@@ -53,6 +57,10 @@
           router
           :collapse="sidebarCollapsed"
         >
+          <el-menu-item index="/">
+            <el-icon><HomeFilled /></el-icon>
+            <span>首页总览</span>
+          </el-menu-item>
           <el-menu-item index="/java-to-ts">
             <el-icon><DataAnalysis /></el-icon>
             <span>Java DTO 转 TS</span>

@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path: '/', redirect: '/tree-visualizer' },
+    { path: '/',                name: 'index',           component: () => import('../views/IndexView.vue') },
     { path: '/java-to-ts',      name: 'java-to-ts',      component: () => import('../views/JavaToTsView.vue') },
     { path: '/zip',             name: 'zip',             component: () => import('../views/ZipToolView.vue') },
     { path: '/tree-visualizer', name: 'tree-visualizer', component: () => import('../views/TreeVisualizerView.vue') },
