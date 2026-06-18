@@ -44,6 +44,19 @@
             </div>
           </el-upload>
 
+          <input
+            ref="folderInputRef"
+            class="folder-input"
+            type="file"
+            multiple
+            webkitdirectory
+            @change="handleFolderChange"
+          >
+
+          <div class="folder-action">
+            <el-button @click="openFolderPicker">选择文件夹</el-button>
+          </div>
+
           <div v-if="compressFiles.length > 0" class="action-bar">
             <el-input v-model="zipFileName" placeholder="输入压缩包名 (默认: archive.zip)" class="zip-name-input" />
             <el-button type="primary" :loading="isCompressing" @click="doCompress">压缩并下载</el-button>
@@ -125,6 +138,7 @@ type FileListItem = any
 
 // Compress state
 const compressFiles = ref<FileListItem[]>([])
+const folderInputRef = ref<HTMLInputElement>()
 const zipFileName = ref('')
 const isCompressing = ref(false)
 const compressProgress = ref(0)
@@ -141,6 +155,24 @@ const handleCompressChange = (_file: FileListItem, fileList: FileListItem[]) => 
 
 const handleCompressRemove = (_file: FileListItem, fileList: FileListItem[]) => {
   compressFiles.value = fileList
+}
+
+const openFolderPicker = () => {
+  folderInputRef.value?.click()
+}
+
+const handleFolderChange = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const files = Array.from(input.files ?? [])
+
+  compressFiles.value = files.map((file, index) => ({
+    name: file.webkitRelativePath || file.name,
+    uid: Date.now() + index,
+    raw: file,
+    path: file.webkitRelativePath || file.name,
+  }))
+
+  input.value = ''
 }
 
 const doCompress = async () => {
@@ -224,6 +256,14 @@ const downloadFile = (fileObj: { name: string; data: Uint8Array }) => {
 .el-icon--upload {
   font-size: 28px;
   color: #5b73e0;
+}
+
+.folder-input {
+  display: none;
+}
+
+.folder-action {
+  margin-top: 12px;
 }
 
 :deep(.el-tabs__item) {
