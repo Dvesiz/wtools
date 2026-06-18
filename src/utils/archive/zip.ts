@@ -4,6 +4,11 @@ export type ArchiveFile = {
   data: Uint8Array
 }
 
+export type CompressFile = {
+  raw: File
+  path?: string
+}
+
 // ── 单文件 Uint8Array 压缩 / 解压 ──
 
 /** 用 JSZip DEFLATE 压缩单个 Uint8Array */
@@ -24,16 +29,19 @@ export const decompressUint8Array = async (compressed: Uint8Array): Promise<Uint
 // ── 多文件压缩 / 解压 ──
 
 export const compressZip = async (
-  files: { raw: File }[],
+  files: CompressFile[],
   onProgress?: (percent: number) => void
 ): Promise<Blob> => {
   const { default: JSZip } = await import('jszip')
   const zip = new JSZip()
 
-  files.forEach(fileItem => {
+  for (const fileItem of files) {
     const file = fileItem.raw
-    zip.file(file.name, file)
-  })
+    if (!file) {
+      throw new Error('Missing upload file data')
+    }
+    zip.file(fileItem.path || file.name, await file.arrayBuffer())
+  }
 
   return zip.generateAsync({
     type: 'blob',
