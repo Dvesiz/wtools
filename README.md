@@ -10,6 +10,7 @@
 [![Element Plus](https://img.shields.io/badge/Element_Plus-409EFF?logo=element&logoColor=white)]()
 [![ECharts 6](https://img.shields.io/badge/ECharts_6-AA344D?logo=apacheecharts&logoColor=white)]()
 [![Pyodide](https://img.shields.io/badge/Pyodide_WASM-005B96?logo=python&logoColor=white)]()
+[![ffmpeg.wasm](https://img.shields.io/badge/ffmpeg.wasm-229922?logo=ffmpeg&logoColor=white)]()
 
 📖 [English](docs/README.md) · [中文](docs/README.zh-CN.md)
 
@@ -26,6 +27,7 @@
 | **List Tree Visualizer** | Render indented tree text (`├ └`) as D3 collapsible lists. Auto-detects file extensions for icons, supports inline comments. |
 | **Java DTO → TypeScript** | Parse Java DTO/VO code and generate TypeScript type definitions. Maps Java types to TS (`String → string`, `Integer → number`, etc). |
 | **ZIP Tool** | Multi-file archiver: compress to ZIP with drag-and-drop; extract ZIP / RAR / 7z / TAR / GZ / XZ / BZ2. Progress bar feedback. |
+| **Video to GIF** | Browser-based MP4/WebM/MOV to GIF converter powered by ffmpeg.wasm. Two-pass palettegen quantization for quality output. Configurable FPS, resolution, time range. |
 
 ---
 
@@ -58,6 +60,7 @@ npm run lint       # Lint code
 | Charts | [ECharts 6](https://echarts.apache.org/) · [D3.js](https://d3js.org/) |
 | Python | [Pyodide](https://pyodide.org/) (WebAssembly) |
 | Archive | [JSZip](https://stuk.github.io/jszip/) · [libarchive.js](https://github.com/nickdesaulniers/libarchive.js) |
+| Video | [ffmpeg.wasm](https://github.com/niclasbrot/ffmpeg.wasm) (CDN lazy, ~24MB WASM) |
 
 ---
 <div align="center">

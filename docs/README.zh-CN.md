@@ -10,6 +10,7 @@
 [![Element Plus](https://img.shields.io/badge/Element_Plus-409EFF?logo=element&logoColor=white)]()
 [![ECharts 6](https://img.shields.io/badge/ECharts_6-AA344D?logo=apacheecharts&logoColor=white)]()
 [![Pyodide](https://img.shields.io/badge/Pyodide_WASM-005B96?logo=python&logoColor=white)]()
+[![ffmpeg.wasm](https://img.shields.io/badge/ffmpeg.wasm-229922?logo=ffmpeg&logoColor=white)]()
 
 [English](README.md)
 
@@ -26,6 +27,7 @@
 | **树列表可视化** | 将制表符缩进文本（`├ └` 前缀）渲染为 D3 可折叠列表，自动匹配文件图标，支持行内注释 |
 | **Java DTO 转 TypeScript** | 解析 Java DTO/VO 代码并生成 TypeScript 类型定义，自动映射基础类型与泛型容器 |
 | **ZIP 压缩 / 解压** | 拖拽打包为 ZIP，解压支持 ZIP / RAR / 7z / TAR / GZ / XZ / BZ2，操作带进度条 |
+| **MP4 转 GIF** | 基于 ffmpeg.wasm 的浏览器端视频转 GIF 工具，两遍 palettegen 色彩量化保证质量，支持自定义帧率、分辨率、起止时间 |
 
 ---
 
@@ -58,6 +60,7 @@ npm run lint       # 代码检查
 | 图表 | [ECharts 6](https://echarts.apache.org/) · [D3.js](https://d3js.org/) |
 | Python | [Pyodide](https://pyodide.org/) (WebAssembly) |
 | 存档 | [JSZip](https://stuk.github.io/jszip/) · [libarchive.js](https://github.com/nickdesaulniers/libarchive.js) |
+| 视频 | [ffmpeg.wasm](https://github.com/niclasbrot/ffmpeg.wasm)（CDN 懒加载，~24MB WASM） |
 
 ---
 
