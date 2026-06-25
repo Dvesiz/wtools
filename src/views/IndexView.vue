@@ -43,7 +43,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import {
-  DataAnalysis, Document, Share, Folder, Monitor,
+  DataAnalysis, Document, Share, Folder, Monitor, VideoCamera,
   ArrowRight,
 } from '@element-plus/icons-vue'
 
@@ -101,6 +101,15 @@ const tools: ToolItem[] = [
     gradient: 'linear-gradient(135deg, #ef4444, #ec4899)',
     tags: ['Pyodide', 'WASM', '离线缓存'],
     badge: 'Pyodide 0.29',
+  },
+  {
+    path: '/video-to-gif',
+    name: 'MP4 转 GIF',
+    desc: '基于 ffmpeg.wasm 的浏览器端视频转 GIF 工具。支持 MP4/WebM/MOV，可调帧率、分辨率、起止时间，两遍 palettegen 色彩量化保证质量。',
+    icon: VideoCamera,
+    gradient: 'linear-gradient(135deg, #8b5cf6, #ec4899)',
+    tags: ['ffmpeg.wasm', 'palettegen', 'CDN 懒加载'],
+    badge: 'v0.12',
   },
 ]
 

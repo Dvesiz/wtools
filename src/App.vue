@@ -37,7 +37,18 @@
             <el-icon><Monitor /></el-icon>
             <span>Python 在线运行</span>
           </el-menu-item>
+          <el-menu-item index="/video-to-gif">
+            <el-icon><VideoCamera /></el-icon>
+            <span>MP4 转 GIF</span>
+          </el-menu-item>
         </el-menu>
+        <div class="drawer-divider" />
+        <div class="drawer-util" @click="drawerOpen = false">
+          <el-button text class="drawer-util-btn" @click="clearCdnCache">
+            <el-icon><Refresh /></el-icon>
+            <span>清除 CDN 缓存</span>
+          </el-button>
+        </div>
       </div>
     </el-drawer>
 
@@ -81,7 +92,28 @@
             <el-icon><Monitor /></el-icon>
             <span>Python 在线运行</span>
           </el-menu-item>
+          <el-menu-item index="/video-to-gif">
+            <el-icon><VideoCamera /></el-icon>
+            <span>MP4 转 GIF</span>
+          </el-menu-item>
         </el-menu>
+
+        <!-- Separator + utilities -->
+        <div class="sidebar-divider" />
+        <div class="sidebar-utils">
+          <template v-if="sidebarCollapsed">
+            <el-tooltip content="清除 CDN 缓存" placement="right">
+              <el-button text class="util-btn" @click="clearCdnCache">
+                <el-icon><Refresh /></el-icon>
+              </el-button>
+            </el-tooltip>
+          </template>
+          <el-button v-else text class="util-btn" @click="clearCdnCache">
+            <el-icon><Refresh /></el-icon>
+            <span>清除缓存</span>
+          </el-button>
+        </div>
+
         <div class="sidebar-footer">
           <el-tooltip
             :content="sidebarCollapsed ? '展开菜单' : '折叠菜单'"
@@ -97,7 +129,11 @@
       <!-- Content area -->
       <div class="content-col">
         <el-main class="main-area">
-          <router-view />
+          <router-view v-slot="{ Component }">
+            <transition name="page-fade" mode="out-in">
+              <component :is="Component" />
+            </transition>
+          </router-view>
         </el-main>
 
         <div class="global-footer">
@@ -159,6 +195,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
+import { ElMessageBox, ElMessage } from 'element-plus'
+import { resetCdnCache } from './utils/cacheReset'
 
 const route = useRoute()
 const sidebarCollapsed = ref(false)
@@ -168,6 +206,20 @@ const drawerOpen = ref(false)
 function onResize() {
   if (window.innerWidth >= 768) {
     drawerOpen.value = false
+  }
+}
+
+async function clearCdnCache() {
+  try {
+    await ElMessageBox.confirm(
+      '将重置 ffmpeg.wasm、ECharts 等 CDN 加载模块的状态，下次访问对应工具时会重新从 CDN 下载。',
+      '清除 CDN 缓存',
+      { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' },
+    )
+    resetCdnCache()
+    ElMessage.success('CDN 缓存已清除')
+  } catch {
+    // user cancelled
   }
 }
 
@@ -412,6 +464,22 @@ onBeforeUnmount(() => {
   background-color: #f5f7fa;
   padding: 20px;
   overflow-y: auto;
+}
+
+/* ============================
+   Page Transition (fade out-in)
+   ============================ */
+.page-fade-leave-active,
+.page-fade-enter-active {
+  transition: opacity 0.15s ease;
+}
+.page-fade-enter-from,
+.page-fade-leave-to {
+  opacity: 0;
+}
+.page-fade-enter-to,
+.page-fade-leave-from {
+  opacity: 1;
 }
 
 /* ============================

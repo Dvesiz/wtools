@@ -9,6 +9,7 @@ const router = createRouter({
     { path: '/tree-visualizer', name: 'tree-visualizer', component: () => import('../views/TreeVisualizerView.vue') },
     { path: '/list-tree',       name: 'list-tree',       component: () => import('../views/ListTreeVisualizerView.vue') },
     { path: '/python-runner',   name: 'python-runner',   component: () => import('../views/PythonRunnerView.vue') },
+    { path: '/video-to-gif',    name: 'video-to-gif',    component: () => import('../views/VideoToGifView.vue') },
   ],
 })
 
