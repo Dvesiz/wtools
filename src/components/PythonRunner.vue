@@ -29,9 +29,7 @@
             </el-popover>
             <span class="header-badge">Pyodide 0.29</span>
           </h2>
-          <el-tag v-if="isReady" type="success" size="small" effect="plain" round>已就绪</el-tag>
-          <el-tag v-else-if="initError" type="danger" size="small" effect="plain" round>初始化失败</el-tag>
-          <el-tag v-else type="warning" size="small" effect="plain" round>初始化中...</el-tag>
+          <el-tag :type="pyTagConfig.type" size="small" effect="plain" round>{{ pyTagConfig.text }}</el-tag>
         </div>
       </div>
     </div>
@@ -258,6 +256,12 @@ function syncCodeToEditor(val: string) {
 
 const isReady = ref(false)
 const initError = ref('')
+
+const pyTagConfig = computed(() => {
+  if (isReady.value)      return { type: 'success' as const, text: '已就绪' }
+  if (initError.value)    return { type: 'danger' as const,  text: '初始化失败' }
+  return                       { type: 'warning' as const, text: '初始化中...' }
+})
 const initPhase = ref<'idle' | 'running' | 'done' | 'error'>('idle')
 const steps = ref<StepState[]>(createSteps())
 const activeMessage = ref('')
