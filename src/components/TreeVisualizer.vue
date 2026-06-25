@@ -167,7 +167,40 @@
       <!-- Right: Chart Panel -->
       <div class="chart-panel">
         <div ref="chartContainer" class="chart-container" />
-        <div v-if="!chartRendered" class="chart-placeholder">
+
+        <!-- Loading echarts from CDN -->
+        <div v-if="echartsState === 'loading' || echartsState === 'idle'" class="chart-overlay">
+          <div class="load-progress">
+            <div class="load-spinner" />
+            <div class="load-text">{{ echartsMessage }}</div>
+            <el-progress
+              :percentage="echartsPercent"
+              :text-inside="true"
+              :stroke-width="16"
+              color="#5b73e0"
+              class="load-bar"
+            />
+            <div class="load-action">
+              <el-button v-if="echartsState === 'idle'" type="primary" size="small" @click="doLoadECharts">
+                加载 ECharts 图表库
+              </el-button>
+              <span class="load-hint">需下载约 1.1MB</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error state -->
+        <div v-else-if="echartsState === 'error'" class="chart-overlay">
+          <div class="load-progress">
+            <el-icon :size="32" color="#f56c6c"><CircleCloseFilled /></el-icon>
+            <div class="load-text">ECharts 加载失败</div>
+            <div class="load-detail">{{ echartsMessage }}</div>
+            <el-button size="small" type="primary" @click="retryLoadECharts">重试</el-button>
+          </div>
+        </div>
+
+        <!-- Empty placeholder (echarts ready, no chart rendered) -->
+        <div v-else-if="!chartRendered" class="chart-placeholder">
           <el-empty :image-size="100" description="输入 JSON 或上传文件后点击「渲染树形图」" />
         </div>
       </div>
@@ -178,15 +211,10 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { captureScroll, preserveScroll } from '../utils/scrollPreserve'
-import { init, use, type EChartsType } from 'echarts/core'
-import { TreeChart } from 'echarts/charts'
-import { TooltipComponent } from 'echarts/components'
-import { CanvasRenderer } from 'echarts/renderers'
-import type { EChartsOption } from 'echarts/types/dist/echarts'
-
-use([TreeChart, TooltipComponent, CanvasRenderer])
+import { loadECharts, getECharts, getEChartsState, resetECharts } from '../utils/echarts/echartsManager'
+import type { EChartsLoadState } from '../utils/echarts/echartsManager'
 import { ElMessage } from 'element-plus'
-import { Upload, Refresh, Delete, Platform, Share, EditPen, DArrowLeft, DArrowRight, Setting, Select, CopyDocument } from '@element-plus/icons-vue'
+import { Upload, Refresh, Delete, Platform, Share, EditPen, CircleCloseFilled, DArrowLeft, DArrowRight, Setting, Select, CopyDocument } from '@element-plus/icons-vue'
 import { useContentCache } from '../utils/contentCache'
 
 // --- Config State ---
@@ -201,6 +229,42 @@ const errorMsg = ref('')
 const nodeCount = ref(0)
 const chartRendered = ref(false)
 const jsonInputRef = ref()
+
+// --- ECharts Lazy Load State ---
+const echartsState = ref<EChartsLoadState>(getEChartsState())
+const echartsPercent = ref(0)
+const echartsMessage = ref('')
+let echartsLoadInitiated = false
+
+async function doLoadECharts() {
+  if (echartsLoadInitiated) return
+  echartsLoadInitiated = true
+  try {
+    await loadECharts((pct, msg) => {
+      echartsPercent.value = pct
+      echartsMessage.value = msg
+      echartsState.value = getEChartsState()
+    })
+    echartsState.value = 'ready'
+    // 如果已有待渲染数据，自动渲染
+    if (jsonInput.value.trim()) {
+      await nextTick()
+      renderChart()
+    }
+  } catch (e: unknown) {
+    echartsState.value = 'error'
+    echartsMessage.value = e instanceof Error ? e.message : String(e)
+  }
+}
+
+async function retryLoadECharts() {
+  resetECharts()
+  echartsState.value = 'idle'
+  echartsPercent.value = 0
+  echartsMessage.value = ''
+  echartsLoadInitiated = false
+  await doLoadECharts()
+}
 
 function onJsonInput(val: string) {
   preserveScroll(jsonInputRef, () => { jsonInput.value = val })
@@ -267,7 +331,8 @@ function onDocumentClick(e: MouseEvent) {
 
 // --- Refs ---
 const chartContainer = ref<HTMLDivElement>()
-let chartInstance: EChartsType | null = null
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- echarts loaded from CDN, no static types
+let chartInstance: any = null
 let chartResizeTimer: ReturnType<typeof setTimeout> | undefined
 
 // --- Sample Data ---
@@ -445,6 +510,11 @@ function onConfigChange() {
 
 function renderChart() {
   if (!chartContainer.value) return
+  if (getEChartsState() !== 'ready') {
+    // ECharts not loaded yet — trigger load if not already started
+    if (!echartsLoadInitiated) doLoadECharts()
+    return
+  }
 
   const data = parseJsonInput()
   if (!data) return
@@ -459,9 +529,12 @@ function renderChart() {
   errorMsg.value = ''
   chartRendered.value = true
 
+  const echarts = getECharts()
+  if (!echarts) return
+
   // Initialize chart if needed
   if (!chartInstance) {
-    chartInstance = init(chartContainer.value)
+    chartInstance = echarts.init(chartContainer.value)
   }
 
   const isLR = orientation.value === 'LR' || orientation.value === 'RL'
@@ -469,7 +542,8 @@ function renderChart() {
   // Determine initial tree depth based on total nodes
   const initialDepth = nodeCount.value > 50 ? 2 : nodeCount.value > 20 ? 3 : 4
 
-  const option: EChartsOption = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const option: Record<string, any> = {
     backgroundColor: 'transparent',
     tooltip: {
       trigger: 'item',
@@ -640,6 +714,9 @@ onMounted(() => {
   if (!isRestored) {
     loadSampleData()
   }
+
+  // Auto-start ECharts CDN load
+  doLoadECharts()
 })
 
 onBeforeUnmount(() => {
@@ -742,6 +819,60 @@ onBeforeUnmount(() => {
 }
 .chart-container:hover {
   border-color: #d4dcff;
+}
+.chart-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px dashed #e2e5ed;
+  border-radius: 10px;
+  background: #fafbfc;
+  z-index: 10;
+}
+.load-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  max-width: 320px;
+  text-align: center;
+}
+.load-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #5b73e0;
+  border-radius: 50%;
+  animation: echarts-spin 0.8s linear infinite;
+}
+@keyframes echarts-spin {
+  to { transform: rotate(360deg); }
+}
+.load-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+.load-detail {
+  font-size: 12px;
+  color: #9ca3af;
+  word-break: break-all;
+  max-width: 280px;
+}
+.load-bar {
+  width: 100%;
+}
+.load-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.load-hint {
+  font-size: 11px;
+  color: #9ca3af;
 }
 .chart-placeholder {
   position: absolute;
