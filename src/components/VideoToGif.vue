@@ -72,25 +72,43 @@
     <template v-if="readyState === 'ready'">
       <!-- Upload -->
       <div class="operation-area mb-4">
-        <el-upload
-          class="upload-demo"
-          drag
-          :auto-upload="false"
-          :on-change="handleFileChange"
-          :file-list="fileList"
-          :limit="1"
-          :accept="acceptFormats"
-        >
-          <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
-          <div class="el-upload__text">
-            拖拽视频到此处，或 <em>点击选择视频文件</em>
-          </div>
-          <template #tip>
-            <div class="el-upload__tip">
-              支持 MP4 / WebM / MOV / AVI
+        <div class="upload-wrapper">
+          <el-upload
+            class="upload-demo"
+            drag
+            :auto-upload="false"
+            :show-file-list="false"
+            :on-change="handleFileChange"
+            :file-list="fileList"
+            :accept="acceptFormats"
+          >
+            <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
+            <div class="el-upload__text">
+              拖拽视频到此处，或 <em>点击选择视频文件</em>
             </div>
-          </template>
-        </el-upload>
+            <template #tip>
+              <div class="el-upload__tip">
+                支持 MP4 / WebM / MOV / AVI
+              </div>
+            </template>
+          </el-upload>
+
+          <!-- Overlay when video exists: intercept click → confirm → pick file -->
+          <div
+            v-if="videoUrl"
+            class="upload-overlay"
+            @click.prevent="handleReUpload"
+          />
+
+          <!-- Hidden file input for manual picking after confirm -->
+          <input
+            ref="fileInputRef"
+            type="file"
+            :accept="acceptFormats"
+            hidden
+            @change="onFileInputChange"
+          />
+        </div>
 
         <!-- Video preview -->
         <div v-if="videoUrl" class="video-preview mt-4">
@@ -132,18 +150,6 @@
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-form-item label="起始时间 (秒)">
-              <el-input-number v-model="startTime" :min="0" :max="maxStartTime" :step="1" style="width: 100%" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item label="持续时间 (秒)">
-              <el-input-number v-model="duration" :min="1" :max="maxDuration" :step="1" style="width: 100%" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row :gutter="16" class="mt-2">
-          <el-col :span="6">
             <el-form-item label="调色板颜色数">
               <el-select v-model="paletteColors" style="width: 100%">
                 <el-option :value="128" label="128 (小文件)" />
@@ -158,6 +164,30 @@
             </el-form-item>
           </el-col>
         </el-row>
+        <div class="time-sliders mt-2">
+          <el-form-item label="起始时间">
+            <el-slider
+              v-model="startTime"
+              :min="0"
+              :max="maxStartTime"
+              :step="1"
+              show-input
+              :show-input-controls="false"
+              style="width: 100%"
+            />
+          </el-form-item>
+          <el-form-item label="持续时间">
+            <el-slider
+              v-model="duration"
+              :min="1"
+              :max="maxDuration"
+              :step="1"
+              show-input
+              :show-input-controls="false"
+              style="width: 100%"
+            />
+          </el-form-item>
+        </div>
 
         <div class="action-bar">
           <el-button
@@ -212,8 +242,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   VideoCamera, UploadFilled, VideoPlay, Download,
 } from '@element-plus/icons-vue'
@@ -283,6 +313,7 @@ async function retryLoad() {
 const fileList = ref<any[]>([])
 const videoUrl = ref('')
 const videoRef = ref<HTMLVideoElement>()
+const fileInputRef = ref<HTMLInputElement>()
 const videoDuration = ref(0)
 const videoWidth = ref(0)
 const videoHeight = ref(0)
@@ -291,14 +322,11 @@ function handleFileChange(uploadFile: any) {
   const raw = uploadFile.raw
   if (!raw) return
 
-  // 释放前一个 URL
-  if (videoUrl.value) URL.revokeObjectURL(videoUrl.value)
-
-  videoUrl.value = URL.createObjectURL(raw)
-  // 保持 fileList 只有一个元素
-  fileList.value = [uploadFile]
-  // 重置结果
+  // 先清除所有旧状态（包括视频 + GIF 结果）
   clearResult()
+  // 再设置新文件状态
+  videoUrl.value = URL.createObjectURL(raw)
+  fileList.value = [uploadFile]
 }
 
 function onVideoMeta() {
@@ -310,7 +338,6 @@ function onVideoMeta() {
     startTime.value = 0
     maxStartTime.value = Math.floor(v.duration)
     duration.value = Math.min(5, Math.floor(v.duration))
-    maxDuration.value = Math.floor(v.duration)
   }
 }
 
@@ -321,9 +348,23 @@ const scaleWidth = ref(480)
 const startTime = ref(0)
 const duration = ref(5)
 const maxStartTime = ref(0)
-const maxDuration = ref(30)
 const paletteColors = ref(192)
 const loop = ref(true)
+
+// ── Duration 上限随起始时间联动 ──
+
+/** 持续时间的最大值 = 视频剩余时长 */
+const maxDuration = computed(() =>
+  Math.max(1, maxStartTime.value - startTime.value),
+)
+
+/** 起始时间变化时，若 duration 超出剩余时长则自动截断 */
+watch(startTime, (newStart) => {
+  const remaining = maxStartTime.value - newStart
+  if (duration.value > remaining) {
+    duration.value = Math.max(1, remaining)
+  }
+})
 
 // ── Conversion ──
 
@@ -347,7 +388,13 @@ function listenFfmpegExec(
   rangeEnd: number,
 ): () => void {
   const onProgress = ({ progress }: ProgressEvent) => {
-    convertPercent.value = Math.round(rangeStart + progress * (rangeEnd - rangeStart))
+    // ffmpeg.wasm 的 progress 偶尔会 > 1.0（短任务 palettegen 尤其常见），
+    // clamp 到 [0, 1] 防止百分比爆炸
+    const p = Math.min(progress, 1.0)
+    convertPercent.value = Math.min(
+      Math.round(rangeStart + p * (rangeEnd - rangeStart)),
+      rangeEnd,
+    )
   }
   const onLog = ({ message }: LogEvent) => {
     // ffmpeg log 行如: "frame=  120 fps=12.0 size=     512kB bitrate= 245.6kbits/s speed=1.02x"
@@ -492,13 +539,61 @@ function downloadGif() {
 }
 
 function clearResult() {
+  // 重置转换状态（进度条、消息）
+  converting.value = false
+  convertPercent.value = 0
+  convertMessage.value = ''
+  convertDetail.value = ''
+
   if (gifUrl.value) {
     URL.revokeObjectURL(gifUrl.value)
   }
   gifUrl.value = ''
   gifSize.value = 0
   gifDuration.value = 0
-  convertPercent.value = 0
+
+  // 清除视频状态，允许重新上传
+  if (videoUrl.value) URL.revokeObjectURL(videoUrl.value)
+  videoUrl.value = ''
+  fileList.value = []
+  videoDuration.value = 0
+  videoWidth.value = 0
+  videoHeight.value = 0
+  maxStartTime.value = 0
+}
+
+// ── Re-upload with confirmation ──
+
+function handleReUpload() {
+  ElMessageBox.confirm(
+    '上传新视频将覆盖当前视频，是否继续？',
+    '确认覆盖',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+      roundButton: true,
+    },
+  ).then(() => {
+    // 用户确认 → 打开系统文件选择器
+    fileInputRef.value?.click()
+  }).catch(() => {
+    // 用户取消，不做任何事
+  })
+}
+
+function onFileInputChange(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+
+  // 替换文件（同 handleFileChange 逻辑）
+  clearResult()
+  videoUrl.value = URL.createObjectURL(file)
+  fileList.value = [{ name: file.name, raw: file, size: file.size, uid: Date.now(), status: 'ready' }]
+
+  // 重置 input，允许下次选择同一文件
+  input.value = ''
 }
 
 // ── Helpers ──
@@ -517,6 +612,32 @@ function formatSize(bytes: number): string {
 </script>
 
 <style scoped>
+/* ============================
+   Upload wrapper & re-upload overlay
+   ============================ */
+.upload-wrapper {
+  position: relative;
+}
+.upload-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+/* ============================
+   Time sliders (linked)
+   ============================ */
+.time-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.time-sliders :deep(.el-slider) {
+  --el-slider-input-width: 72px;
+}
+
 /* ============================
    Core controls (compact loading)
    ============================ */
@@ -544,9 +665,11 @@ function formatSize(bytes: number): string {
    ============================ */
 .video-preview {
   max-width: 100%;
+  overflow: hidden;
 }
 .preview-video {
   width: 100%;
+  max-width: 100%;
   max-height: 360px;
   border-radius: 8px;
   background: #000;
@@ -623,7 +746,8 @@ function formatSize(bytes: number): string {
     width: 100%;
   }
 
-  :deep(.el-col-6) {
+  :deep(.el-col-6),
+  :deep(.el-col-12) {
     width: 100% !important;
     max-width: 100% !important;
     flex: 0 0 100% !important;
