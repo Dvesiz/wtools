@@ -111,6 +111,14 @@ const tools: ToolItem[] = [
     tags: ['ffmpeg.wasm', 'palettegen', 'CDN 懒加载'],
     badge: 'v0.12',
   },
+  {
+    path: '/markdown-to-word',
+    name: 'Markdown 转 Word',
+    desc: '将 .md 文件转换为可编辑的 Word 文档，支持标题、列表、表格、引用、代码块和链接，转换依赖从 CDN 按需加载。',
+    icon: Document,
+    gradient: 'linear-gradient(135deg, #0ea5e9, #14b8a6)',
+    tags: ['DOCX 导出', '本地转换', 'CDN 懒加载'],
+  },
 ]
 
 function navigateTo(path: string) {

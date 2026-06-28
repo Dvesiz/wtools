@@ -41,6 +41,10 @@
             <el-icon><VideoCamera /></el-icon>
             <span>MP4 转 GIF</span>
           </el-menu-item>
+          <el-menu-item index="/markdown-to-word">
+            <el-icon><Document /></el-icon>
+            <span>Markdown 转 Word</span>
+          </el-menu-item>
         </el-menu>
         <div class="drawer-divider" />
         <div class="drawer-util" @click="drawerOpen = false">
@@ -95,6 +99,10 @@
           <el-menu-item index="/video-to-gif">
             <el-icon><VideoCamera /></el-icon>
             <span>MP4 转 GIF</span>
+          </el-menu-item>
+          <el-menu-item index="/markdown-to-word">
+            <el-icon><Document /></el-icon>
+            <span>Markdown 转 Word</span>
           </el-menu-item>
         </el-menu>
 

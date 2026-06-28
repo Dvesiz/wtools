@@ -12,5 +12,6 @@ import { resetECharts } from './echarts/echartsManager'
 export function resetCdnCache(): void {
   resetFFmpeg()
   resetECharts()
+  void import('./markdownWord/markdownToWord').then(({ resetMarkdownWord }) => resetMarkdownWord())
   // 后续新增的 CDN 懒加载模块也在此处注册
 }
